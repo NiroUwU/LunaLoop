@@ -2,7 +2,7 @@
 
 ## About
 
-LunaLoop is a discord general-purpose bot written in Lua, using the discordia [discord-api](https://github.com/SinisterRectus/Discordia).
+LunaLoop is a discord general-purpose bot written in Lua, using the [discordia](https://github.com/SinisterRectus/Discordia) discord-api.
 
 ## Installation and Running
 
