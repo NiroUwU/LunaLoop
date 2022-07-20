@@ -13,12 +13,9 @@ function beforeBotRun() {
 
 	# Execute first time setup, if file "info.lua" not found:
 	[ -f "info.lua" ] || $PATH_scripts/setup.sh
-
-	# Execute updater, if luvit not found:
-	[[ -f "lit" && -f "luvi" && -f "luvit" ]] || ./updateDeps.sh
 }
 function runBot() {
-	./luvit main.lua || printf "Bot ran into an issue!\n"
+	luvit main.lua || printf "Bot ran into an issue!\n"
 }
 function afterBotRun() {
 	printf "Bot terminated at %s.\n" "$(date)"

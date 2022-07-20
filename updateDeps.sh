@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TASKS=( 'curl -L https://github.com/luvit/lit/raw/master/get-lit.sh | sh' './lit install SinisterRectus/discordia ' )
+TASKS=( './lit install SinisterRectus/discordia ' )
 
 function main() {
 	for task in "${TASKS[@]}"; do

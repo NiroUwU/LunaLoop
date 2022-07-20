@@ -13,7 +13,7 @@ info = {
 	name = 'LunaLoop',
 	version = 'v0.1',
 	prefix = '=',
-	id = '0123456789',	
+	id = '0123456789',
 	token = 'very_secret_token',
 	invite = 'https://discord.com/',
 	repository = 'https://github.com/NiroUwU/LunaLoop'
@@ -28,10 +28,6 @@ Included in this Repository:
 
 + Lua Programming Language
 
-+ Luvit running environment
-
-+ Lit 
-
 + Discordia API
 
 Required on your system:
@@ -39,3 +35,5 @@ Required on your system:
 + bash
 
 + curl
+
++ [Luvit runtime](https://github.com/luvit/luvit)
