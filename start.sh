@@ -5,6 +5,9 @@ PATH_scripts=./scripts
 
 
 # FUNCTIONS:
+function autoUpdate() {
+	git pull || echo -e "Could not fetch updates..."
+}
 function beforeBotRun() {
 	chmod +x -R scripts/*
 	chmod +x ./*.sh
@@ -24,6 +27,7 @@ function afterBotRun() {
 
 # MAIN:
 function main() {
+	autoUpdate
 	beforeBotRun
 	runBot
 	afterBotRun

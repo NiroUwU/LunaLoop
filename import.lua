@@ -2,6 +2,7 @@
 bot = require "src/bot"
 
 -- Import General Data About the Bot
+globalInfo = require "globalInfo"
 info = require "info"
 
 -- Commands:

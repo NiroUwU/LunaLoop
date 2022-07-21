@@ -55,23 +55,25 @@ Client:on("messageCreate", function(Message)
 		end
 	end
 	
-	-- Split up message by spaces:
+	-- Split up message by spaces into table:
 	for s in string.gmatch(messageData.rawString, "%S+") do
 		table.insert(messageData.split, s)
 	end
 
-	-- Attempt Command Execution if first character is ".":
+	-- Check if split table is valid, return if empty:
 	if messageData.split[1] ~= nil then
 		messageData.split[1] = tostring(messageData.split[1])
 	else
 		bot.debug("Split table content ('%s') seems to be empty, aborting.", table.concat(messageData.split, ", ", 1, #messageData.split))
 		return
 	end
-	if string.sub(messageData.split[1], 1, 1) == info.prefix and #messageData.split[1] > 1 then
+
+	-- Attempt command execution, if first character(s) is/are prefix:
+	if string.sub(messageData.split[1], 1, #info.prefix):lower() == info.prefix:lower() and #messageData.split[1] > 1 then
 		attemptCommandExecution(
-			Message,                                                     -- Message Object
-			string.sub(messageData.split[1], 2, #messageData.split[1]),  -- Command String
-			messageData.split                                            -- Raw Message Fragments (will be transformed into args)
+			Message,                                                                          -- Message Object
+			string.sub(messageData.split[1], #info.prefix+1, #messageData.split[1]):lower(),  -- Command String
+			messageData.split                                                                 -- Raw Message Fragments (will be transformed into args)
 		)
 	end
 end)

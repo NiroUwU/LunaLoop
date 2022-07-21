@@ -3,6 +3,9 @@ Commands = {
 }
 
 local function add(Name, Desc, Type, Func)
+	-- Case insensitive:
+	Name = Name:lower()
+
 	Commands.list[Name] = {
 		name = Name,
 		desc = Desc,
@@ -13,7 +16,8 @@ end
 local commandType = {
 	technical = "Technical",
 	chat = "Chatting",
-	social = "Social"
+	social = "Social",
+	math = "Math"
 }
 
 
@@ -21,7 +25,11 @@ local commandType = {
 
 -- Technical:
 add("info", "Displays info about the bot.", commandType.technical, function(Message, Caller, ...)
-	local output = "Hi, I'm " .. info.name .. "\nI am a general-purpose bot, written in Lua!\nMy prefix is " .. info.prefix .. "!"
+	local output = "Hi, I'm " .. info.name .. "\nI am a general-purpose bot, written in Lua!\n"
+	local prefix = "My prefix is: " .. info.prefix
+	local source = "Check out my source code: " .. info.repository
+
+	output = output .. string.format("%s\n%s\n", prefix, source)
 	Message.channel:send(output)
 end)
 
@@ -92,11 +100,80 @@ add("echo", "I will echo back whatever you said to me.", commandType.chat, funct
 	end
 	local str = table.concat(tab, " ")
 	
-	Message.channel:send(Caller.mentionString .. " said: '" .. str .. "'")
+	Message.channel:send(Message.author.mentionString .. " said: '" .. str .. "'")
 end)
 
 add("hello", "Greet me, I greet you.", commandType.chat, function(Message, Caller, ...)
 	Message.channel:send(HelloResponse[math.random(1, #HelloResponse)])
+end)
+
+
+-- Math:
+add("flip", "Flip a coin.", commandType.math, function(Message, Caller, ...)
+	local flip = ""
+	if math.random(0, 9) < 5 then
+		flip = "Heads"
+	else
+		flip = "Tails"
+	end
+
+	Message.channel:send(Message.author.mentionString .. " flipped a coin:\n**" .. flip .. "**")
+end)
+
+add("roll", "Roll a die. (Supports `roll int int` and `roll string`(-> String: '2d6', '4d20') )", commandType.math, function(Message, Caller, ...)
+	local arg = ...
+	local default = "1d6"
+	local roll = default
+	local maxRolls = 100
+
+	-- Set roll to custom XdY string:
+	if arg[1] ~= nil and arg[2] == nil then
+		roll = tostring(arg[1]):lower()
+	end
+	if arg[1] ~= nil and arg[2] ~= nil then
+		roll = tostring(arg[1]) .. "d" .. tostring(arg[2])
+	end
+
+	-- Seperate t and d from string:
+	local seperator = string.find(roll, "d")
+	local t, d = string.sub(roll, 1, seperator-1), string.sub(roll, seperator+1, #roll)
+
+	-- Check for t and d being numbers and error message if not:
+	local usage = "Usage: roll 2d6 (-> rolls a 6-sided die two times)\nUsage: roll 2 6"
+	t, d = tonumber(t), tonumber(d)
+	if t == nil or d == nil then
+		Message.channel:send("Faulty Syntax. Make sure you provide two integers!\n" .. usage)
+		return
+	end
+	if t < 1 or d < 1 then
+		Message.channel:send("Faulty Syntax. Make sure you provide positive numbers!\n" .. usage)
+		return
+	end
+	t, d = math.ceil(t), math.ceil(d)
+
+	-- Roll dice and send to output:
+	local output = ""
+
+	-- Make d not more than maxRolls:
+	if t > maxRolls then t = maxRolls output = output .. string.format("Maximum rolls are limited to %d!\n\n", t) end
+	local rolls = {}
+	for i=1, t do
+		local newRoll = math.random(1, d)
+		table.insert(rolls, newRoll)
+	end
+
+	local stats={
+		sum = 0,
+		concat = table.concat(rolls, ", "),
+		average = 0
+	}
+	for i, v in pairs(rolls) do
+		stats.sum = stats.sum + v
+	end
+	stats.average = stats.sum / t
+
+	output = output .. string.format("**All rolls:** %s\n**Sum of all rolls:** %d\n**Average roll:** %d", stats.concat, stats.sum, stats.average)
+	Message.channel:send(output)
 end)
 
 
@@ -107,7 +184,7 @@ local function handleSocialEvent(Message, Caller, type, textAction, emojis)
 		return string.format("You need to ping the person you want to %s!\nUsage: %s @AnotherUser", type, type)
 	end
 
-	local active = Caller.mentionString
+	local active = Message.author.mentionString
 	local passive = Message.mentionedUsers["first"].mentionString
 	local text = textAction .. " you"
 	local emoji = emojis[1]
