@@ -10,6 +10,7 @@ roll, flip
 
 Fixed issues:
 - Bot crash when hugging/slapping/kissing/booping/patting yourself in dms of the bot
+- Added pat command
 
 Other:
 - Commands are now caseinsensitive
