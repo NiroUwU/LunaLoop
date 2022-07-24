@@ -211,6 +211,13 @@ add("hug", "Hug another server member. :)", commandType.social, function(Message
 		{":)", ";) <3"}
 	))
 end)
+add("pat", "Pat another server memeber. :D", commandType.social, function(Message, Caller, ...)
+	Message.channel:send(handleSocialEvent(
+		Message, Caller,
+		"pat", "patted",
+		{"-v-", "^v^"}
+	))
+end)
 add("slap", "Slap another server member. >:(", commandType.social, function(Message, Caller, ...)
 	Message.channel:send(handleSocialEvent(
 		Message, Caller,
