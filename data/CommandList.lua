@@ -1,4 +1,4 @@
-Commands = {
+CommandList = {
 	list = {}
 }
 
@@ -6,7 +6,7 @@ local function add(Name, Desc, Type, Func)
 	-- Case insensitive:
 	Name = Name:lower()
 
-	Commands.list[Name] = {
+	CommandList.list[Name] = {
 		name = Name,
 		desc = Desc,
 		type = Type,
@@ -38,7 +38,7 @@ add("help", "Displays a help message about all commands.", commandType.technical
 
 	-- Sort by command types:
 	local sorted = {}
-	for i, v in pairs(Commands.list) do
+	for i, v in pairs(CommandList.list) do
 		if sorted[v.type] == nil then
 			sorted[v.type] = {}
 		end
@@ -135,11 +135,15 @@ add("roll", "Roll a die. (Supports `roll int int` and `roll string`(-> String: '
 	end
 
 	-- Seperate t and d from string:
+	local usage = "Usage: roll 2d6 (-> rolls a 6-sided die two times)\nUsage: roll 2 6"
 	local seperator = string.find(roll, "d")
+	if seperator == nil then
+		Message.channel:send("Faulty Syntax. Make sure you provide two integers!\n" .. usage)
+		return
+	end
 	local t, d = string.sub(roll, 1, seperator-1), string.sub(roll, seperator+1, #roll)
 
 	-- Check for t and d being numbers and error message if not:
-	local usage = "Usage: roll 2d6 (-> rolls a 6-sided die two times)\nUsage: roll 2 6"
 	t, d = tonumber(t), tonumber(d)
 	if t == nil or d == nil then
 		Message.channel:send("Faulty Syntax. Make sure you provide two integers!\n" .. usage)
@@ -172,7 +176,7 @@ add("roll", "Roll a die. (Supports `roll int int` and `roll string`(-> String: '
 	end
 	stats.average = stats.sum / t
 
-	output = output .. string.format("**All rolls:** %s\n**Sum of all rolls:** %d\n**Average roll:** %d", stats.concat, stats.sum, stats.average)
+	output = output .. string.format("**All rolls:** %s\n\n**Sum of all rolls:** %d\n**Average roll:** %d", stats.concat, stats.sum, stats.average)
 	Message.channel:send(output)
 end)
 
@@ -241,4 +245,4 @@ add("boop", "Boop another server member. -v-", commandType.social, function(Mess
 end)
 
 
-return Commands
+return CommandList

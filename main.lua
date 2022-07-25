@@ -8,13 +8,8 @@ require "import"
 bot.isDebug = true
 
 -- Functions:
-Client:on("ready", function()
-	bot.debug("Bot started: %s", os.date())
-end
-)
-
 local function attemptCommandExecution(Message, commandString, args)
-	for i, v in pairs(Commands.list) do
+	for i, v in pairs(CommandList.list) do
 		if i == commandString then
 			bot.debug("Executing command '%s'!", commandString)
 
@@ -28,8 +23,15 @@ local function attemptCommandExecution(Message, commandString, args)
 	bot.debug("Command '%s' was not found!", commandString)
 end
 
+local function findMessageSubstring(Message, messageData, ...)
+end
+
 
 -- MAIN:
+Client:on("ready", function()
+	bot.debug("Bot started: %s", os.date())
+end)
+
 Client:on("messageCreate", function(Message)
 	local messageData = {
 		object = Message,
@@ -76,6 +78,9 @@ Client:on("messageCreate", function(Message)
 			messageData.split                                                                 -- Raw Message Fragments (will be transformed into args)
 		)
 	end
+
+	-- Find Substring, react to it:
+	findMessageSubstring(Message, messageData)
 end)
 
 

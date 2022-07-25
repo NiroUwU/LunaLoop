@@ -10,12 +10,18 @@ roll, flip
 
 Fixed issues:
 - Bot crash when hugging/slapping/kissing/booping/patting yourself in dms of the bot
+- Bot crash when rolling die with one argument and no seperator
 - Added pat command
 
 Other:
 - Commands are now caseinsensitive
 - Prefixes can now be multiple strings long
 - Added auto "git pull" request in start.sh script for automatic updates
+]]
+
+--[[Changelog['v0.3'] = [[
+Fixed issues:
+- Bot crash when rolling die with no seperator substring
 ]]
 
 return Changelog

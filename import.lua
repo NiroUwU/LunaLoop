@@ -7,7 +7,7 @@ info = require "info"
 
 -- Commands:
 require "src/class/Command"
-require "data/Commands"
+require "data/CommandList"
 
 -- IDs:
 require "data/BannedIDs"
