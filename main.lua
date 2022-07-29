@@ -6,6 +6,7 @@ Client = Discord.Client()
 
 require "import"
 bot.isDebug = true
+switch = Switch.switch
 
 -- Functions:
 local function attemptCommandExecution(Message, commandString, args)
@@ -23,7 +24,29 @@ local function attemptCommandExecution(Message, commandString, args)
 	bot.debug("Command '%s' was not found!", commandString)
 end
 
-local function findMessageSubstring(Message, messageData, ...)
+local function findMessageSubstring(Message, Caller, messageData, ...)
+	local actions = {}
+	print(#ReactionList)
+	-- Add reactions in message:
+	for i,v in pairs(ReactionList) do
+		for j,k in pairs(v.trigger) do
+			print(j .. k)
+			if string.gmatch(Message.content, k) then
+				table.insert(actions, v)
+				bot.debug("Reaction ID '%s' is queued for execution!", v.id)
+			end
+		end
+	end
+
+	-- Execute reaction behaviour:
+	for i,v in pairs(actions) do
+		if v.reactionType == "reply" then
+			v.reply(Message, Caller, messageData, ...)
+		end
+		if v.reactionType == "reaction" then
+			v.react(Message, Caller, messageData, ...)
+		end
+	end
 end
 
 
@@ -79,10 +102,9 @@ Client:on("messageCreate", function(Message)
 		)
 	end
 
-	-- Find Substring, react to it:
-	findMessageSubstring(Message, messageData)
+	-- Find Substring, react to it: (still broken)
+	-- findMessageSubstring(Message, messageData)
 end)
-
 
 
 Client:run('Bot ' .. info.token)

@@ -19,9 +19,9 @@ Other:
 - Added auto "git pull" request in start.sh script for automatic updates
 ]]
 
---[[Changelog['v0.3'] = [[
-Fixed issues:
-- Bot crash when rolling die with no seperator substring
+Changelog['v0.3'] = [[
+Added command:
+- convert (converts units of measurements)
 ]]
 
 return Changelog

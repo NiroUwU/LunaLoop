@@ -141,10 +141,10 @@ add("roll", "Roll a die. (Supports `roll int int` and `roll string`(-> String: '
 		Message.channel:send("Faulty Syntax. Make sure you provide two integers!\n" .. usage)
 		return
 	end
-	local t, d = string.sub(roll, 1, seperator-1), string.sub(roll, seperator+1, #roll)
+	local t_, d_ = string.sub(roll, 1, seperator-1), string.sub(roll, seperator+1, #roll)
 
 	-- Check for t and d being numbers and error message if not:
-	t, d = tonumber(t), tonumber(d)
+	local t, d = tonumber(t_), tonumber(d_)
 	if t == nil or d == nil then
 		Message.channel:send("Faulty Syntax. Make sure you provide two integers!\n" .. usage)
 		return
@@ -178,6 +178,86 @@ add("roll", "Roll a die. (Supports `roll int int` and `roll string`(-> String: '
 
 	output = output .. string.format("**All rolls:** %s\n\n**Sum of all rolls:** %d\n**Average roll:** %d", stats.concat, stats.sum, stats.average)
 	Message.channel:send(output)
+end)
+
+add("convert", "Convert units of measurement.", commandType.math, function(Message, Caller, ...)
+	local args = ...
+	-- Table of units: (base unit is valued as 1)
+	local units = Units.list
+
+	-- Error Handling:
+	local usage = "Usage: convert 2 m cm ( -> 200cm)\nUsage: convert 2000 ml l ( -> 2l)\n\nRefer to these list of units:\n"
+	for i,v in pairs(units) do
+		local concat = {}
+		for j,k in pairs(v) do
+			table.insert(concat, j)
+		end
+		local cat_name = (string.sub(i, 1, 1)):upper()..string.sub(i, 2, -1):lower()
+		usage = usage .. "\n" .. cat_name .. ":\n> " .. table.concat(concat, ",  ")
+	end
+	local function handleErrorMessage(txt, ...)
+		Message.channel:send(string.format(txt, ...) .. "\n" .. usage)
+	end
+
+	-- Arguments checked for existance:
+	if args == nil then
+		handleErrorMessage("Please make sure to provide three arguments! (value, initial unit, goal unit)")
+		return
+	end
+	local num, initial_unit, goal_unit = args[1], args[2], args[3]
+	if num == nil or initial_unit == nil or goal_unit == nil then
+		handleErrorMessage("Please make sure to provide three arguments! (value, initial unit, goal unit)")
+		return
+	end
+	initial_unit = tostring(initial_unit):lower()
+	goal_unit = tostring(goal_unit):lower()
+
+	-- Check if number:
+	num = tonumber(num)
+	if num == nil then
+		handleErrorMessage("You have to provide a number as first input to convert!")
+		return
+	end
+
+	-- Check unit validity/compatibility:
+	local a, b = nil, nil
+	local vars = {}
+	for category,v in pairs(units) do
+		for u,var in pairs(v) do
+			if u == initial_unit then
+				a = category
+				vars[1] = var
+			end
+			if u == goal_unit then
+				b = category
+				vars[2] = var
+			end
+		end
+	end
+	local notcat = "not a cetegory"
+	if a == nil then a = notcat end
+	if b == nil then b = notcat end
+	if a ~= b or a == notcat or b == notcat then
+		handleErrorMessage("Provided units '%s' (%s) and '%s' (%s), do not match categories!", initial_unit, a, goal_unit, b)
+		return
+	end
+
+	-- Conversion of values:
+	local multiplyer = vars[2] / vars[1]
+	local out = num
+	out = out / multiplyer
+
+	-- Overwrite out with funky wunky weird temperature calculation (finally works, kill me):
+	if a == 'temperature' then
+		local C = Units.temp.convertToC(num, initial_unit)
+		out = Units.temp.convertToX(C, goal_unit)
+		if out == nil then
+			Message.channel:send("There was an error converting values!")
+			return
+		end
+	end
+
+	Message.channel:send(string.format("Converted Value:\n" .. num .. " %s = " .. out .. " %s", initial_unit, goal_unit))
 end)
 
 

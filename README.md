@@ -10,13 +10,13 @@ Simply clone this repository and run the `start.sh` file from your terminal. Upo
 
 ```lua
 info = {
-	name = 'LunaLoop',
-	version = 'v0.1',
-	prefix = '=',
-	id = '0123456789',
-	token = 'very_secret_token',
-	invite = 'https://discord.com/',
-	repository = 'https://github.com/NiroUwU/LunaLoop'
+    name = 'LunaLoop',
+    version = 'v0.1',
+    prefix = '=',
+    id = '0123456789',
+    token = 'very_secret_token',
+    invite = 'https://discord.com/',
+    repository = 'https://github.com/NiroUwU/LunaLoop'
 }
 
 return info
@@ -26,9 +26,7 @@ return info
 
 Included in this Repository:
 
-+ Lua Programming Language
-
-+ Discordia API
++ [Discordia](https://github.com/SinisterRectus/Discordia)
 
 Required on your system:
 
@@ -37,3 +35,15 @@ Required on your system:
 + curl
 
 + [Luvit runtime](https://github.com/luvit/luvit)
+
+  + Lua 5.2 (comes bundled with Luvit)
+
+## Supported Systems
+
+This bot has been tested on the following systems:
+
++ Arch Linux (x86_64 architecture)
+
++ Rasbian Linux (armv7l architecture)
+
+If you have problems compiling the luvit runtime, check out [pre-built luvit binaries](https://github.com/truemedian/luvit-bin) (at your own risk, as it is not an official luvit repository!)
