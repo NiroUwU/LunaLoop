@@ -49,9 +49,16 @@ local function findMessageSubstring(Message, Caller, messageData, ...)
 	end
 end
 
+local function updateProfile()
+	Client:setUsername(info.name)
+	Client:setGame(BotProfile.playing)
+	-- Client:setStatus(BotProfile.status)
+end
+
 
 -- MAIN:
 Client:on("ready", function()
+	updateProfile()
 	bot.debug("Bot started: %s", os.date())
 end)
 
@@ -102,7 +109,7 @@ Client:on("messageCreate", function(Message)
 		)
 	end
 
-	-- Find Substring, react to it: (still broken)
+	-- Find Substring, react to it: (still broken... ;w;)
 	-- findMessageSubstring(Message, messageData)
 end)
 
