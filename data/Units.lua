@@ -1,6 +1,7 @@
 Units = {}
 Units.list = {
 	['length'] = {
+		['mm']   = 0.001,
 		['cm']   = 0.01,
 		['dm']   = 0.1,
 		['m']    = 1,
@@ -72,6 +73,22 @@ Units.list = {
 		['ft/s'] = 1.09728,
 
 		['knot'] = 1.852001
+	},
+	['duration'] = {
+		['nanosecond'] = (1/60)*0.000000001,
+		['microsecond'] = (1/60)*0.000001,
+		['millisecond'] = (1/60)*0.001,
+		['second'] = 1/60,
+		['minute'] = 1,
+		['hour'] = 60,
+		['day'] = 1440,
+		['week'] = 10080,
+		['fortnight'] = 20160,
+		['month'] = 43830,
+		['year'] = 525960,
+		['decade'] = 5259600,
+		['century'] = 52596000,
+		['milennium'] = 525960000
 	},
 	['temperature'] = {
 		['c'] = 1,

@@ -1,9 +1,13 @@
 filehandler = {}
 
 function filehandler.read(file)
-	file:open(file, "r")
-	local output = file:read("*a")
-	file:close()
+	local f = io.open(file, "r")
+	if f == nil then
+		return string.format("File '%s' could not be read! Exiting. :(", file)
+	end
+
+	local output = f:read("*a")
+	f:close()
 
 	return output
 end

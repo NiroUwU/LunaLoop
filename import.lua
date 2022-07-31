@@ -1,6 +1,8 @@
 -- Help Utils
 bot = require "src/bot"
 easy = require "src/easy"
+filehandler = require "src/filehandler"
+bash = require "src/bash"
 
 -- Libraries:
 Class  = require "lib/class"  -- https://github.com/vrld/hump/blob/master/class.lua
@@ -23,6 +25,7 @@ require "data/ReactionList"
 require "data/BannedIDs"
 
 -- Data required for Commands:
+require "data/Filesystem"
 require "data/BotProfile"
 require "data/Units"
 require "data/HelloResponse"

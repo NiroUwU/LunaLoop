@@ -36,4 +36,12 @@ Changes:
 - added a "Playing" status message
 ]]
 
+Changelog['v0.4.1'] = [[
+Changes:
+- convert command now only displays list of units when executing `convert list`, not cluttering up your full screen :)
+
+Added Functionality:
+- Bot can now run shell scripts through commands, giving more interaction with the host system
+]]
+
 return Changelog

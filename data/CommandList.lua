@@ -167,6 +167,7 @@ add("checklove", "Check the love value between two members.", commandType.math, 
 	local usage = "\nUsage: checklove @FirstMember @SecondMember"
 	if #mentioned < 2 then
 		Message.channel:send("You need to provide two users as input!" .. usage)
+		return
 	end
 
 	-- Member IDs:
@@ -279,14 +280,15 @@ add("convert", "Convert units of measurement.", commandType.math, function(Messa
 	local units = Units.list
 
 	-- Error Handling:
-	local usage = "Usage: convert 2 m cm ( -> 200cm)\nUsage: convert 2000 ml l ( -> 2l)\n\nRefer to these list of units:\n"
+	local usage = "Usage: convert 2 m cm ( -> 200cm)\nUsage: convert 2000 ml l ( -> 2l)\n\nPlease refer to the command `convert list` for a full list of units!"
+	local list = "Full list of units:\n"
 	for i,v in pairs(units) do
 		local concat = {}
 		for j,k in pairs(v) do
 			table.insert(concat, j)
 		end
 		local cat_name = easy.string.firstUppercase(i)
-		usage = usage .. "\n" .. cat_name .. ":\n> " .. table.concat(concat, ",  ")
+		list = list .. "\n" .. cat_name .. ":\n> " .. table.concat(concat, ",  ")
 	end
 	local function handleErrorMessage(txt, ...)
 		Message.channel:send(string.format(txt, ...) .. "\n" .. usage)
@@ -294,7 +296,11 @@ add("convert", "Convert units of measurement.", commandType.math, function(Messa
 
 	-- Arguments checked for existance:
 	if args == nil then
-		handleErrorMessage("Please make sure to provide three arguments! (value, initial unit, goal unit)")
+		handleErrorMessage("You have to provide three arguments! (value, initial unit, goal unit)")
+		return
+	end
+	if args[1] == "list" then
+		Message.channel:send(list)
 		return
 	end
 	local num, initial_unit, goal_unit = args[1], args[2], args[3]
