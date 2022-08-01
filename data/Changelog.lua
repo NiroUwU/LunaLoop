@@ -39,6 +39,13 @@ Changes:
 Changelog['v0.4.1'] = [[
 Changes:
 - convert command now only displays list of units when executing `convert list`, not cluttering up your full screen :)
+- more units added to the convert command
+- info command with more information
+
+Fixed Issues:
+- Bot crash when executing checklove command with the same person as both arguments
+- convert command value correction
+- spelling mistakes
 
 Added Functionality:
 - Bot can now run shell scripts through commands, giving more interaction with the host system

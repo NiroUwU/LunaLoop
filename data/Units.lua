@@ -7,6 +7,12 @@ Units.list = {
 		['m']    = 1,
 		['km']   = 1000,
 
+		['planck_length'] = tonumber(1.616255e-35),
+		['au'] = 149597870700,
+		['ls'] = 299792458,
+		['lm'] = 17987547480,
+		['ly'] = tonumber(9.460731e+15),
+
 		['inch'] = 0.0254,
 		['ft']   = 0.3048,
 		['yard'] = 0.9144,
@@ -60,14 +66,16 @@ Units.list = {
 		['g'] = 1,
 		['kg'] = 1000,
 		['t'] = 1000000,
-		['lbs'] = 0.4535924,
+		['planck_mass'] = tonumber(2.176434e-8),
 
-		['t_us'] = 907.1847,
-		['ounce'] = 0.02834952
+		['lbs'] = 453.59,
+		['t_us'] = 907180,
+		['oz'] = 28.35
 	},
 	['speed'] = {
 		['km/h'] = 1,
 		['m/s'] = 3.6,
+		['lightspeed'] = 1079252848.7999,
 
 		['mph'] = 1.609344,
 		['ft/s'] = 1.09728,
@@ -75,10 +83,12 @@ Units.list = {
 		['knot'] = 1.852001
 	},
 	['duration'] = {
+		['planck_time'] = (1/60)*tonumber(5.391247e-44),
 		['nanosecond'] = (1/60)*0.000000001,
 		['microsecond'] = (1/60)*0.000001,
 		['millisecond'] = (1/60)*0.001,
 		['second'] = 1/60,
+		['kilosecond'] = (1/60)*1000,
 		['minute'] = 1,
 		['hour'] = 60,
 		['day'] = 1440,
@@ -94,7 +104,8 @@ Units.list = {
 		['c'] = 1,
 		['k'] = 1,
 		['f'] = 5/9,
-		['r'] = 5/9
+		['r'] = 5/9,
+		['planck_temperature'] = tonumber(1.416784e+32)
 	}
 }
 
@@ -117,13 +128,15 @@ Units.temp.convertToC = function (numX, fromUnit)
 	if fromUnit == 'k' then
 		out = numX - offset['k']
 	end
+	if fromUnit == 'planck_temperature' then
+		out = list['planck_temperature'] * numX - offset['k']
+	end
 	if fromUnit == 'f' then
 		out = list['f'] * (numX - offset['f'])
 	end
 	if fromUnit == 'r' then
 		out = (numX - 491.67) * list['r']
 	end
-
 	return out
 end
 Units.temp.convertToX = function (numC, toUnit)
@@ -134,6 +147,9 @@ Units.temp.convertToX = function (numC, toUnit)
 	if toUnit == 'k' then
 		out = numC + offset['k']
 	end
+	if toUnit == 'planck_temperature' then
+		out = (numC + offset['k']) / list['planck_temperature']
+	end
 	if toUnit == 'f' then
 		out = numC / list['f'] + offset['f']
 	end
@@ -142,35 +158,5 @@ Units.temp.convertToX = function (numC, toUnit)
 	end
 	return out
 end
-
-
---[[This is broken for some reason (im really pissed off):
-{
-	-- Function to normalise values from X° to °C:
-	['c'] = function(temp, unit)
-		local result = Switch.switch(unit, {
-			['c'] = function ()
-				return temp
-			end,
-			['k'] = function ()
-				return temp - offset[unit]
-			end,
-			['f'] = function()
-				return (list[unit] * temp + offset[unit])
-			end
-		})
-		bot.debug(result)
-		return result
-	end,
-
-	-- Conversion Functions from °C to X:
-	['f'] = function(temp)
-		return (temp / offset['f']) + offset['f']
-	end,
-	['k'] = function(temp)
-		return temp - offset['k']
-	end
-}
-]]
 
 return Units

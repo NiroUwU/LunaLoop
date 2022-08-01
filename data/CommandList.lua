@@ -25,11 +25,31 @@ local commandType = {
 
 -- Technical:
 add("info", "Displays info about the bot.", commandType.technical, function(Message, Caller, ...)
-	local output = "Hi, I'm " .. info.name .. "\nI am a general-purpose bot, written in Lua!\n"
-	local prefix = "My prefix is: " .. info.prefix
-	local source = "Check out my source code: `" .. info.repository .. "`"
+	local function line(str, ...)
+		if str == nil then
+			str = ""
+		end
+		return string.format(str, ...)
+	end
+	local function head(str, ...)
+		local format = "__"
+		return format .. line(str, ...) .. format
+	end
+	local content = {
+		line("Hi, I'm %s! I am a general-purpose Discord bot, written in Lua.", info.name),
+		line("My prefix is: %s", info.prefix),
+		line("My invite link: %s", info.invite),
+		line(),
+		head("Technical Information:"),
+		line("Current version: %s", info.version),
+		line("Bot Uptime: %s", bot.time.getUptimeFormated()),
+		line("Source Code: `%s`", info.repository)
+	}
 
-	output = output .. string.format("%s\n%s\n", prefix, source)
+	local output = table.concat(content, "\n")
+	if output == nil then
+		output = string.format("Hi, I am %s, my programming is bad and i ran into an error displaying my info.\nI hope this will be fixed soon :)", info.name)
+	end
 	Message.channel:send(output)
 end)
 
@@ -333,7 +353,7 @@ add("convert", "Convert units of measurement.", commandType.math, function(Messa
 			end
 		end
 	end
-	local notcat = "not a cetegory"
+	local notcat = "not a category"
 	if a == nil then a = notcat end
 	if b == nil then b = notcat end
 	if a ~= b or a == notcat or b == notcat then

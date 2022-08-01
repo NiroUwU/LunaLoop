@@ -59,6 +59,7 @@ end
 -- MAIN:
 Client:on("ready", function()
 	updateProfile()
+	bot.time.setStartup()
 	bot.debug("Bot started: %s", os.date())
 end)
 
@@ -86,7 +87,7 @@ Client:on("messageCreate", function(Message)
 			return
 		end
 	end
-	
+
 	-- Split up message by spaces into table:
 	for s in string.gmatch(messageData.rawString, "%S+") do
 		table.insert(messageData.split, s)
