@@ -1,34 +1,69 @@
+local path = ""
+-- Switches Path:
+local function cd(newPath)
+	path = newPath
+	print("\n🔍 Loading in:     *" .. newPath .. "*")
+end
+
+-- Loads a module:
+local modCount = 0
+local function load(request)
+	-- Module Path:
+	local location = path .. "/" .. request
+	local mod = require(location)
+
+	-- Feedback Prinout:
+	local out = "✅ Loaded Module:  " .. request
+	-- Indentation:
+	local gap = " "
+	for i=#out, 35 do
+		gap = gap .. " "
+	end
+
+	-- Return Module:
+	print(out .. gap ..  "(" .. location .. ")")
+	modCount = modCount + 1
+	return mod
+end
+
 -- Help Utils
-bot = require "src/bot"
-easy = require "src/easy"
-filehandler = require "src/filehandler"
-bash = require "src/bash"
+cd("src")
+bot = load "bot"
+easy = load "easy"
+filehandler = load "filehandler"
+bash = load "bash"
+
 
 -- Libraries:
-Class  = require "lib/class"  -- https://github.com/vrld/hump/blob/master/class.lua
-Switch = require "lib/Switch" -- https://github.com/NiroUwU/Lua-Utils/blob/main/Switch.lua
-base64 = require "lib/base64" -- https://github.com/iskolbin/lbase64/blob/master/base64.lua
+cd("lib")
+Class  = load "class"  -- https://github.com/vrld/hump/blob/master/class.lua
+Switch = load "Switch" -- https://github.com/NiroUwU/Lua-Utils/blob/main/Switch.lua
+base64 = load "base64" -- https://github.com/iskolbin/lbase64/blob/master/base64.lua
 
 -- Import General Data About the Bot
-globalInfo = require "globalInfo"
-info = require "info"
+cd("")
+globalInfo = load "globalInfo"
+info = load "info"
 
--- Commands:
-require "src/class/Command"
-require "data/CommandList"
+-- Import Classes:
+cd("src/class")
+load "Command"
+load "MessageSubstring"
 
--- Substring Responses:
-require "src/class/MessageSubstring"
-require "data/ReactionList"
+-- Import Data:
+cd("data")
+load "CommandList"
+load "BannedIDs"
+load "BotProfile"
+load "Filesystem"
+load "Colours"
 
--- IDs:
-require "data/BannedIDs"
-
--- Data required for Commands:
-require "data/Filesystem"
-require "data/BotProfile"
-require "data/Units"
-require "data/HelloResponse"
-require "data/Gifs"
-require "data/Changelog"
-require "data/YesNoMaybe"
+-- Command Data:
+cd("data/commands")
+load "ReactionList"
+load "Units"
+load "HelloResponse"
+load "Gifs"
+load "Changelog"
+load "YesNoMaybe"
+load "InfoCommandData"

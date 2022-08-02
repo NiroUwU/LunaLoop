@@ -20,69 +20,70 @@ local commandType = {
 	math = "Math"
 }
 
+-- FUNCTIONS:
+local function getErrorMessageEmbed(errorType, errormessage, usage)
+	if errorType == nil or errorType == "" then
+		errorType = ""
+	else
+		errorType = easy.string.firstUppercase(tostring(errorType)) .. " "
+	end
+	return {
+		title = errorType .. "Error",
+		description = errormessage,
+		footer = {
+			text = "Usage:\n" .. usage
+		},
+		color = Colours.embeds.error
+	}
+end
+
 
 -- COMMAND LIST:
 
 -- Technical:
 add("info", "Displays info about the bot.", commandType.technical, function(Message, Caller, ...)
-	local function line(str, ...)
-		if str == nil then
-			str = ""
-		end
-		return string.format(str, ...)
-	end
-	local function head(str, ...)
-		local format = "__"
-		return format .. line(str, ...) .. format
-	end
-	local content = {
-		line("Hi, I'm %s! I am a general-purpose Discord bot, written in Lua.", info.name),
-		line("My prefix is: %s", info.prefix),
-		line("My invite link: %s", info.invite),
-		line(),
-		head("Technical Information:"),
-		line("Current version: %s", info.version),
-		line("Bot Uptime: %s", bot.time.getUptimeFormated()),
-		line("Source Code: `%s`", info.repository)
-	}
-
-	local output = table.concat(content, "\n")
-	if output == nil then
-		output = string.format("Hi, I am %s, my programming is bad and i ran into an error displaying my info.\nI hope this will be fixed soon :)", info.name)
-	end
-	Message.channel:send(output)
+	Message:reply { embed = InfoCommandData.getFullTable()}
 end)
 
 add("help", "Displays a help message about all commands.", commandType.technical, function(Message, Caller, ...)
-	local output = "Here is a list of all commands this I am capable of:"
-
-	-- Sort by command types:
 	local sorted = {}
 	for i, v in pairs(CommandList.list) do
+		-- Create new Category if not existant:
 		if sorted[v.type] == nil then
 			sorted[v.type] = {}
 		end
+
+		-- Add command to category:
 		table.insert(sorted[v.type], v)
 	end
 	table.sort(sorted)
 
-	-- Add one by one by types to output:
-	for i, v in pairs(sorted) do
-		output = output .. "\n**__" .. tostring(i) .. "__**:"
-
-		-- Add each command to output:
-		for _, l in pairs(v) do
-			local cmd_name = "**" .. tostring(l.name) .. "**"
-			local desc = "*" .. tostring(l.desc) .. "*"
-			output = output .. "\n> " .. cmd_name .. "   " .. desc
+	local finalFields = {}
+	for category, cmds in pairs(sorted) do
+		local newField = {
+			name = easy.string.firstUppercase(category),
+			value = "",
+			inline = false
+		}
+		for _, cmd in pairs(cmds) do
+			newField.value = newField.value .. string.format("\n**%s** - *%s*", cmd.name, cmd.desc)
 		end
+		table.insert(finalFields, newField)
 	end
 
-	Message.channel:send(tostring(output))
+	Message:reply { embed = {
+		title = "Command List",
+		description = "This is a list of all commands I am capable of!",
+		fields = finalFields,
+		color = Colours.embeds.default
+	}}
 end)
 
 add("ping", "Pong! :D", commandType.technical, function(Message, Caller, ...)
-	Message.channel:send("Pong! :ping_pong:")
+	Message:reply { embed = {
+		title = "Pong! :ping_pong:",
+		color = Colours.embeds.default
+	}}
 end)
 
 add("changelog", "Shows the changelog for the current or a specific version of the bot.", commandType.technical, function(Message, Caller, ...)
@@ -102,11 +103,18 @@ add("changelog", "Shows the changelog for the current or a specific version of t
 		end
 		local list = table.concat(tab, ", ")
 
-		Message.channel:send("The requested version '" .. showVersion .."' does not exist.\nPlease refer to one of these availabe options: *" .. list .. "*\nUsage: changelog [*optional:* specific_version]")
+		-- Version could not be found:
+		local err = "Version '" .. showVersion .. "' does not exist.\n"
+		err = err .. "Please refer to one of these availabe options: (current version is: '**" .. info.version .. "**')\n" .. list
+		Message:reply { embed = getErrorMessageEmbed(nil, err, "changelog [*optional:* specific_version]")}
 		return
 	end
 
-	Message.channel:send("__Changelog for version '" .. showVersion .. "':__\n\n" .. tostring(Changelog[showVersion]))
+	Message:reply { embed = {
+		title = "Changelog for version " .. showVersion,
+		description = tostring(Changelog[showVersion]),
+		color = Colours.embeds.default
+	}}
 end)
 
 
@@ -114,15 +122,29 @@ end)
 add("echo", "I will echo back whatever you said to me.", commandType.chat, function(Message, Caller, ...)
 	local tab = ...
 	if #tab == 0 then
-		Message.channel:send("You have to provide a string for me to echo back!\nUsage: echo [string]")
+		local err = "Insufficient Arguments. You have to provide a string for me to echo back!"
+		Message:reply { embed = getErrorMessageEmbed("Syntax", err, "echo [string]")}
 		return
 	end
 	local str = table.concat(tab, " ")
 
-	Message.channel:send(Message.author.mentionString .. " said: '" .. str .. "'")
+	Message:reply { embed = {
+		description = str,
+		author = {
+			name = Message.author.username,
+			icon_url = Message.author.avatarURL
+		},
+		color = Colours.embeds.default
+	}}
 end)
 
 add("hello", "Greet me, I greet you.", commandType.chat, function(Message, Caller, ...)
+	--[[
+	Message:reply { embed = {
+		title = HelloResponse[math.random(1, #HelloResponse)],
+		color = Colours.embeds.default
+	}}
+	]]
 	Message.channel:send(HelloResponse[math.random(1, #HelloResponse)])
 end)
 
@@ -136,7 +158,11 @@ add("flip", "Flip a coin.", commandType.math, function(Message, Caller, ...)
 		flip = "Tails"
 	end
 
-	Message.channel:send(Message.author.mentionString .. " flipped a coin:\n**" .. flip .. "**")
+	Message:reply { embed = {
+		title = "Coin Flip!",
+		description = Message.author.mentionString .. " got **" .. flip .. "**!",
+		color = Colours.embeds.default
+	}}
 end)
 
 add("ynm", "Yes? No? Maybe? Ask me a question!", commandType.math, function(Message, Caller, ...)
@@ -164,53 +190,65 @@ end)
 
 add("pickrandom", "Pick a random word from a string input (seperated by spaces).", commandType.math, function(Message, Caller, ...)
 	local args = ...
-	local usage = "\nUsage: pickrandom option1 option2 option3 long_option_four option.5 ( -> randomly chosen)"
 
-	local function handleErrorMessage(txt, ...)
-		Message.channel:send(string.format(txt, ...) .. usage)
+	local function throwError()
+		local err = "Please provide a string from which words can be randomly picked."
+		local usage = "pickrandom option1 option2 option3 long_option_four option.5 (-> randomly chosen)"
+		Message:reply { embed = getErrorMessageEmbed("Syntax", err, usage)}
 	end
 	if args == nil then
-		handleErrorMessage("Please provide a string from which words can be randomly picked.")
+		throwError()
 		return
 	end
 	if #args < 1 then
-		handleErrorMessage("Please provide a string from which words can be randomly picked.")
+		throwError()
 		return
 	end
 
 	local pick = easy.table.randomIn(args)
-	Message.channel:send("Your randomly chosen word is:\n**" .. pick .. "**")
+	Message:reply { embed = {
+		title = "Random Word Choice",
+		description = "Your randomly chosen word is:  **" .. pick .. "** !",
+		color = Colours.embeds.default
+	}}
 end)
 
 add("checklove", "Check the love value between two members.", commandType.math, function(Message, Caller, ...)
 	local mentioned = Message.mentionedUsers
-	local usage = "\nUsage: checklove @FirstMember @SecondMember"
+	local usage = "checklove @FirstMember @SecondMember"
 	if #mentioned < 2 then
-		Message.channel:send("You need to provide two users as input!" .. usage)
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "You need to provide two users as input!", usage)}
 		return
 	end
 
 	-- Member IDs:
 	mentioned = {mentioned[1][1], mentioned[1][2]}
 
-	local percentage = (mentioned[1]%1000 + mentioned[2]%1000) % 101
-	Message.channel:send(string.format("%s x %s = %d%s", "<@"..mentioned[1]..">", "<@"..mentioned[2]..">", percentage, "%"))
+	local percentage = tostring((mentioned[1]%1000 + mentioned[2]%1000) % 101) .. "%"
+	local user1 = "<@"..mentioned[1]..">"
+	local user2 = "<@"..mentioned[2]..">"
+	Message:reply { embed = {
+		title = "Love check",
+		description = string.format("%s :two_hearts: %s = %s", user1, user2, percentage),
+		color = Colours.list.pink
+	}}
 end)
 
 add("checktruth", "Check the truth-value of a given statement.", commandType.math, function(Message, Caller, ...)
 	local args = ...
-	local usage = "\nUsage: checktruth This String Will Be Evaluated For The Truth Value"
+	local usage = "checktruth This String Will Be Evaluated For The Truth Value"
+
 	local function handleErrorMessage(txt, ...)
-		Message.channel:send(string.format(txt, ...) .. usage)
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "You need to provide a string to evaluate after the command name!", usage)}
 	end
 
 	-- Check if string provided:
 	if args == nil then
-		handleErrorMessage("Faulty Syntax. You need to provide a string to evaluate after the command name!")
+		handleErrorMessage()
 		return
 	end
 	if #args < 1 then
-		handleErrorMessage("Faulty Syntax. You need to provide a string to evaluate after the command name!")
+		handleErrorMessage()
 		return
 	end
 
@@ -220,7 +258,7 @@ add("checktruth", "Check the truth-value of a given statement.", commandType.mat
 
 	-- Emergency Break-Out:
 	if fullEncoded == nil then
-		Message.channel:send("There was an error calculating the truth value...")
+		Message:reply { embed = getErrorMessageEmbed("Internal", "There was an error calculating the truth value...", usage)}
 		return
 	end
 
@@ -231,7 +269,11 @@ add("checktruth", "Check the truth-value of a given statement.", commandType.mat
 	end
 	percentage = percentage % 101
 
-	Message.channel:send(string.format("The truth value for... `%s`... is %d%s!", fullString, percentage, "%"))
+	local out = tostring(percentage % 101) .. "%"
+	Message:reply { embed = {
+		title = "Truth check",
+		description = string.format("The truth value for... `%s`... is **%s**!", fullString, out)
+	}}
 end)
 
 add("roll", "Roll a die. (Supports `roll int int` and `roll string`(-> String: '2d6', '4d20') )", commandType.math, function(Message, Caller, ...)
@@ -249,10 +291,10 @@ add("roll", "Roll a die. (Supports `roll int int` and `roll string`(-> String: '
 	end
 
 	-- Seperate t and d from string:
-	local usage = "Usage: roll 2d6 (-> rolls a 6-sided die two times)\nUsage: roll 2 6"
+	local usage = "Uroll 2d6 (-> rolls a 6-sided die two times)\nroll 2 6"
 	local seperator = string.find(roll, "d")
 	if seperator == nil then
-		Message.channel:send("Faulty Syntax. Make sure you provide two integers!\n" .. usage)
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "Make sure you provide two integers!", usage)}
 		return
 	end
 	local t_, d_ = string.sub(roll, 1, seperator-1), string.sub(roll, seperator+1, #roll)
@@ -260,11 +302,11 @@ add("roll", "Roll a die. (Supports `roll int int` and `roll string`(-> String: '
 	-- Check for t and d being numbers and error message if not:
 	local t, d = tonumber(t_), tonumber(d_)
 	if t == nil or d == nil then
-		Message.channel:send("Faulty Syntax. Make sure you provide two integers!\n" .. usage)
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "Make sure you provide two integers!", usage)}
 		return
 	end
 	if t < 1 or d < 1 then
-		Message.channel:send("Faulty Syntax. Make sure you provide positive numbers!\n" .. usage)
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "Make sure you provide only positive numbers!", usage)}
 		return
 	end
 	t, d = math.ceil(t), math.ceil(d)
@@ -273,7 +315,11 @@ add("roll", "Roll a die. (Supports `roll int int` and `roll string`(-> String: '
 	local output = ""
 
 	-- Make d not more than maxRolls:
-	if t > maxRolls then t = maxRolls output = output .. string.format("Maximum rolls are limited to %d!\n\n", t) end
+	local warning = ""
+	if t > maxRolls then
+		warning = string.format("Maximum rolls are limited to %d!\n\n", maxRolls)
+		t = maxRolls output = output .. warning
+	end
 	local rolls = {}
 	for i=1, t do
 		local newRoll = math.random(1, d)
@@ -291,7 +337,31 @@ add("roll", "Roll a die. (Supports `roll int int` and `roll string`(-> String: '
 	stats.average = stats.sum / t
 
 	output = output .. string.format("**All rolls:** %s\n\n**Sum of all rolls:** %d\n**Average roll:** %d", stats.concat, stats.sum, stats.average)
-	Message.channel:send(output)
+	if not (Message:reply { embed = {
+		title = "Die Roll",
+		description = string.format(warning .. "You rolled a %d-sided die %d times! Here are your results:", d, t),
+		fields = {
+			{
+				name = "__Average Sides:__",
+				value = tostring(stats.average),
+				inline = false
+			},
+			{
+				name = "__Sum of all Sides:__",
+				value = tostring(stats.sum),
+				inline = false
+			},
+			{
+				name = "__All rolls:__",
+				value = tostring(stats.concat),
+				inline = false
+			}
+		},
+		color = Colours.embeds.default
+	}}) then
+		Message:reply("Embed message could not be sent, contained too many characters?")
+		Message.channel:send(output)
+	end
 end)
 
 add("convert", "Convert units of measurement.", commandType.math, function(Message, Caller, ...)
@@ -300,29 +370,44 @@ add("convert", "Convert units of measurement.", commandType.math, function(Messa
 	local units = Units.list
 
 	-- Error Handling:
-	local usage = "Usage: convert 2 m cm ( -> 200cm)\nUsage: convert 2000 ml l ( -> 2l)\n\nPlease refer to the command `convert list` for a full list of units!"
-	local list = "Full list of units:\n"
+	local usage = "convert 2 m cm ( -> 200cm)\nconvert 2000 ml l ( -> 2l)\n\nPlease refer to the command 'convert list' for a full list of units!"
+	local list = {}
 	for i,v in pairs(units) do
+		local temp = {
+			name = easy.string.firstUppercase(i),
+			value = "",
+			inline = false
+		}
 		local concat = {}
-		for j,k in pairs(v) do
+		for j,_ in pairs(v) do
 			table.insert(concat, j)
 		end
-		local cat_name = easy.string.firstUppercase(i)
-		list = list .. "\n" .. cat_name .. ":\n> " .. table.concat(concat, ",  ")
+		temp.value = table.concat(concat, ",  ")
+		table.insert(list, temp)
 	end
 	local function handleErrorMessage(txt, ...)
-		Message.channel:send(string.format(txt, ...) .. "\n" .. usage)
+		Message:reply { embed = getErrorMessageEmbed("Syntax", string.format(txt,...), usage)}
+		--Message.channel:send(string.format(txt, ...) .. "\n" .. usage)
 	end
 
-	-- Arguments checked for existance:
+	-- Check if arguments exist:
 	if args == nil then
 		handleErrorMessage("You have to provide three arguments! (value, initial unit, goal unit)")
 		return
 	end
+
+	-- Display unit list:
 	if args[1] == "list" then
-		Message.channel:send(list)
+		Message:reply { embed = {
+			title = "Unit conversion list",
+			description = "This is a list of all available units and categories:",
+			fields = list,
+			color = Colours.embeds.default
+		}}
 		return
 	end
+
+	-- Check if all three arguments are present
 	local num, initial_unit, goal_unit = args[1], args[2], args[3]
 	if num == nil or initial_unit == nil or goal_unit == nil then
 		handleErrorMessage("Please make sure to provide three arguments! (value, initial unit, goal unit)")
@@ -331,14 +416,14 @@ add("convert", "Convert units of measurement.", commandType.math, function(Messa
 	initial_unit = tostring(initial_unit):lower()
 	goal_unit = tostring(goal_unit):lower()
 
-	-- Check if number:
+	-- Check if args[1] is number:
 	num = tonumber(num)
 	if num == nil then
 		handleErrorMessage("You have to provide a number as first input to convert!")
 		return
 	end
 
-	-- Check unit validity/compatibility:
+	-- Check unit validity/compatibility of units:
 	local a, b = nil, nil
 	local vars = {}
 	for category,v in pairs(units) do
@@ -370,13 +455,18 @@ add("convert", "Convert units of measurement.", commandType.math, function(Messa
 	if a == 'temperature' then
 		local C = Units.temp.convertToC(num, initial_unit)
 		out = Units.temp.convertToX(C, goal_unit)
+		-- Check if conversion was successful:
 		if out == nil then
-			Message.channel:send("There was an error converting values!")
+			Message:reply { embed = getErrorMessageEmbed("Internal", "There was an error converting values!", usage)}
 			return
 		end
 	end
 
-	Message.channel:send(string.format("Converted Value:\n" .. num .. " %s = " .. out .. " %s", initial_unit, goal_unit))
+	Message:reply { embed = {
+		title = "Unit conversion",
+		description = string.format("Converted Value:\n" .. num .. " %s = **" .. out .. "** %s", initial_unit, goal_unit),
+		color = Colours.embeds.default
+	}}
 end)
 
 
@@ -384,7 +474,11 @@ end)
 local function handleSocialEvent(Message, Caller, type, textAction, emojis)
 	-- Check if no members have been mentioned:
 	if #Message.mentionedUsers == 0 then
-		return string.format("You need to ping the person you want to %s!\nUsage: %s @AnotherUser", type, type)
+		local err = string.format("You need to ping the person you want to %s!", type)
+		local usage = string.format("%s @AnotherUser", type)
+
+		Message:reply { embed = getErrorMessageEmbed("Syntax", err, usage)}
+		return
 	end
 
 	local active = Message.author.mentionString
@@ -404,43 +498,50 @@ local function handleSocialEvent(Message, Caller, type, textAction, emojis)
 	end
 
 	-- Return the full string, ready to be sent:
-	return string.format("%s %s %s! %s\n%s", active, text, passive, emoji, gif)
+	Message:reply { embed = {
+		title = easy.string.firstUppercase("Someone has been " .. textAction),
+		description = string.format("%s %s %s! %s", active, text, passive, emoji),
+		image = {
+			url = gif
+		},
+		color = Colours.list.pink
+	}}
 end
 
 add("hug", "Hug another server member. :)", commandType.social, function(Message, Caller, ...)
-	Message.channel:send(handleSocialEvent(
+	handleSocialEvent(
 		Message, Caller,
 		"hug", "hugged",
 		{":)", ";) <3"}
-	))
+	)
 end)
 add("pat", "Pat another server memeber. :D", commandType.social, function(Message, Caller, ...)
-	Message.channel:send(handleSocialEvent(
+	handleSocialEvent(
 		Message, Caller,
 		"pat", "patted",
 		{"-v-", "^v^"}
-	))
+	)
 end)
 add("slap", "Slap another server member. >:(", commandType.social, function(Message, Caller, ...)
-	Message.channel:send(handleSocialEvent(
+	handleSocialEvent(
 		Message, Caller,
 		"slap", "slapped",
 		{">:(", ">:O"}
-	))
+	)
 end)
 add("kiss", "Kiss another server member. :3", commandType.social, function(Message, Caller, ...)
-	Message.channel:send(handleSocialEvent(
+	handleSocialEvent(
 		Message, Caller,
 		"kiss", "kissed",
 		{":3", ";3 <3"}
-	))
+	)
 end)
 add("boop", "Boop another server member. -v-", commandType.social, function(Message, Caller, ...)
-	Message.channel:send(handleSocialEvent(
+	handleSocialEvent(
 		Message, Caller,
 		"boop", "booped",
 		{":p", ";p"}
-	))
+	)
 end)
 
 

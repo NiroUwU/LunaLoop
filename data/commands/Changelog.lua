@@ -51,4 +51,9 @@ Added Functionality:
 - Bot can now run shell scripts through commands, giving more interaction with the host system
 ]]
 
+Changelog['v1.0.0'] = [[
+Changes:
+- Commands have been migrated to be sent as embeds
+]]
+
 return Changelog
