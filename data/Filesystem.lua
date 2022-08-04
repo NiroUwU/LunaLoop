@@ -2,7 +2,8 @@
 
 Filesystem = {
 	autoRemoveCache = true,
-	cache = "cache"
+	cache = "cache",
+	logs = "logs"
 }
 
 return Filesystem

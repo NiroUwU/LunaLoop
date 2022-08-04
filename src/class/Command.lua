@@ -1,7 +1,7 @@
 Command = {}
 Command.__index = Command
 
-function Command.new(Name, Description, Type, Function)
+function Command:new(Name, Description, Type, Function)
     if tostring(type(Type)) == 'function' and Function == nil then
         Function = Type
         Type = "Other"

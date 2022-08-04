@@ -1,53 +1,38 @@
 -- SETUP:
 
 -- Variables:
-Discord = require "discordia"
-Client = Discord.Client()
+Discordia = require "discordia"
+Class = Discordia.class
+Client = Discordia.Client()
 
 require "import"
 bot.isDebug = true
 switch = Switch.switch
 
 -- Functions:
-local function attemptCommandExecution(Message, commandString, args)
+local function getGlobalErrorMessage()
+	return {
+		title = "Internal Bot Error",
+		description = "The bot ran into an error while executing a command.\nPlease report this issue if you see this message. :)",
+		footer = {
+			text = "Please report here: " .. info.repository .. "/issues"
+		}
+	}
+end
+
+local function attemptCommandExecution(Message, commandString, args, ...)
 	for i, v in pairs(CommandList.list) do
 		if i == commandString then
 			bot.debug("Executing command '%s'!", commandString)
 
-			--if args ~= nil then
-				table.remove(args, 1)
-			--end
-			v.fn(Message, Message.member, args)
+			table.remove(args, 1)
+			v.fn(Message, Message.author, args, ...)
 			return
 		end
 	end
 	bot.debug("Command '%s' was not found!", commandString)
 end
 
-local function findMessageSubstring(Message, Caller, messageData, ...)
-	local actions = {}
-	print(#ReactionList)
-	-- Add reactions in message:
-	for i,v in pairs(ReactionList) do
-		for j,k in pairs(v.trigger) do
-			print(j .. k)
-			if string.gmatch(Message.content, k) then
-				table.insert(actions, v)
-				bot.debug("Reaction ID '%s' is queued for execution!", v.id)
-			end
-		end
-	end
-
-	-- Execute reaction behaviour:
-	for i,v in pairs(actions) do
-		if v.reactionType == "reply" then
-			v.reply(Message, Caller, messageData, ...)
-		end
-		if v.reactionType == "reaction" then
-			v.react(Message, Caller, messageData, ...)
-		end
-	end
-end
 
 local function updateProfile()
 	Client:setUsername(info.name)
@@ -73,17 +58,15 @@ Client:on("messageCreate", function(Message)
 
 	-- Check if Message content is empty:
 	if Message.content == nil or #messageData.rawString < 1 then
-		print("\n")
-		bot.debug("Got string with no content, exiting!")
+		--bot.debug("Got message with no content, exiting!")
 		return
 	else
-		print("\n")
-		bot.debug("Got message: '%s'", messageData.rawString)
+		--bot.debug("Got message: '%s'", messageData.rawString)
 	end
 	-- Check if Member ID is blocked:
 	for _, id in pairs(BannedIDs) do
 		if id == Message.author.id then
-			bot.debug("Member ID '%s' was blocked.", id)
+			bot.debug("Member ID '%s' was blocked, ignoring.", id)
 			return
 		end
 	end
@@ -113,6 +96,29 @@ Client:on("messageCreate", function(Message)
 	-- Find Substring, react to it: (still broken... ;w;)
 	-- findMessageSubstring(Message, messageData)
 end)
+
+
+Client:on("reactionAdd", function(Reaction, CallerID)
+	local Message = Reaction.message
+	local msg = MessageReaction.list[Message.id]
+	bot.debug("Bot observed an emoji reaction '%s' by %s", Reaction.emojiName, tostring(CallerID))
+
+	for i=0, #BannedIDs do
+		if CallerID == BannedIDs[i] then
+			bot.debug("Blocked user reacted to message, ignoring.")
+			return
+		end
+	end
+
+	-- Check if message stored in memory:
+	if not msg then
+		bot.debug("Message with the id '%s' not saved in memory!", Message.id)
+		return
+	end
+	bot.debug("Executing saved message id '%s' function!", Message.id)
+	MessageReaction:execute(Message, Reaction, CallerID)
+end)
+
 
 
 Client:run('Bot ' .. info.token)

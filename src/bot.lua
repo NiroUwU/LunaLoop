@@ -5,7 +5,19 @@ bot = {
 
 -- Debug text output:
 function bot.debug(text, ...)
-	print(" :: DEBUG: " .. string.format(text, ...))
+	local out = string.format(text, ...)
+	print(" :: DEBUG: " .. out)
+	bot.log(out)
+end
+
+-- Write Bot logs:
+function bot.log(txt)
+	local logs = io.open(Filesystem.logs .. "/bot.log", "a+")
+	if logs == nil then return end
+
+	local out = string.format("%s: %s\n", os.date(), txt)
+	logs:write(out)
+	logs:close()
 end
 
 -- Global sleep function:

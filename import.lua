@@ -36,7 +36,7 @@ bash = load "bash"
 
 -- Libraries:
 cd("lib")
-Class  = load "class"  -- https://github.com/vrld/hump/blob/master/class.lua
+--Class  = load "class"  -- https://github.com/vrld/hump/blob/master/class.lua
 Switch = load "Switch" -- https://github.com/NiroUwU/Lua-Utils/blob/main/Switch.lua
 base64 = load "base64" -- https://github.com/iskolbin/lbase64/blob/master/base64.lua
 
@@ -48,7 +48,8 @@ info = load "info"
 -- Import Classes:
 cd("src/class")
 load "Command"
-load "MessageSubstring"
+load "MessageReaction"
+--load "MessageSubstring"
 
 -- Import Data:
 cd("data")
@@ -64,6 +65,7 @@ load "ReactionList"
 load "Units"
 load "HelloResponse"
 load "Gifs"
+load "Dating"
 load "Changelog"
 load "YesNoMaybe"
 load "InfoCommandData"

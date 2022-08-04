@@ -41,11 +41,35 @@ end
 -- COMMAND LIST:
 
 -- Technical:
-add("info", "Displays info about the bot.", commandType.technical, function(Message, Caller, ...)
+add("info", "Displays info about the bot.", commandType.technical, function(Message, Caller, args, ...)
 	Message:reply { embed = InfoCommandData.getFullTable()}
 end)
 
-add("help", "Displays a help message about all commands.", commandType.technical, function(Message, Caller, ...)
+add("apple", "Test reaction response, spoiler: it SHOULD work", commandType.technical, function(Message, Caller, args, ...)
+	local emoji = "🍎"
+	local secret_emoji = "🍏"
+	local sentMessage = Message:reply { embed = {
+		title = string.format("React with %s for funny :)", emoji)
+	}}
+	sentMessage:addReaction(emoji)
+
+	local function response()
+		bot.debug("Executing!")
+		Message:reply { embed = {
+			title = string.format("hehe %s", emoji)
+		}}
+	end
+	local function responseSecret()
+		bot.debug("Executing secret...")
+		Message:reply { embed = {
+			title = string.format("Bet you're really smart, aren't ya... %s", secret_emoji)
+		}}
+	end
+
+	MessageReaction:add(sentMessage, {[emoji] = response, [secret_emoji] = responseSecret}, nil, Message.author.id, false, true)
+end)
+
+add("help", "Displays a help message about all commands.", commandType.technical, function(Message, Caller, args, ...)
 	local sorted = {}
 	for i, v in pairs(CommandList.list) do
 		-- Create new Category if not existant:
@@ -79,14 +103,14 @@ add("help", "Displays a help message about all commands.", commandType.technical
 	}}
 end)
 
-add("ping", "Pong! :D", commandType.technical, function(Message, Caller, ...)
+add("ping", "Pong! :D", commandType.technical, function(Message, Caller, args, ...)
 	Message:reply { embed = {
 		title = "Pong! :ping_pong:",
 		color = Colours.embeds.default
 	}}
 end)
 
-add("changelog", "Shows the changelog for the current or a specific version of the bot.", commandType.technical, function(Message, Caller, ...)
+add("changelog", "Shows the changelog for the current or a specific version of the bot.", commandType.technical, function(Message, Caller, args, ...)
 	local arg = ...
 	local showVersion = ""
 	bot.debug(tostring(arg))
@@ -119,8 +143,8 @@ end)
 
 
 -- Chatting:
-add("echo", "I will echo back whatever you said to me.", commandType.chat, function(Message, Caller, ...)
-	local tab = ...
+add("echo", "I will echo back whatever you said to me.", commandType.chat, function(Message, Caller, args, ...)
+	local tab = args
 	if #tab == 0 then
 		local err = "Insufficient Arguments. You have to provide a string for me to echo back!"
 		Message:reply { embed = getErrorMessageEmbed("Syntax", err, "echo [string]")}
@@ -148,6 +172,79 @@ add("hello", "Greet me, I greet you.", commandType.chat, function(Message, Calle
 	Message.channel:send(HelloResponse[math.random(1, #HelloResponse)])
 end)
 
+add("profile", "Display a server member's profile.", commandType.chat, function(Message, Caller, args, ...)
+	local mentioned = Message.mentionedUsers
+	local usage = "profile @TargetUser"
+
+	-- Check if the target user was mentioned:
+	if #mentioned == nil then
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "You have to mention a target user to get their profile information from.", usage)}
+		return
+	end
+
+	local user = mentioned["first"]
+	if not user then
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "You have to mention a target user to get their profile information from.", usage)}
+		return
+	end
+
+	if not Message.guild then
+		Message:reply { embed = getErrorMessageEmbed("Usage", "Please make sure you are using this command in a server.", usage)}
+		return
+	end
+	local member = Message.guild.members:get(user.id)
+	local content = {
+		{'Server Name', member.nickname or user.name},
+		{'User ID', user.id},
+
+		{'Highest Role', member.highestRole.mentionString},
+		{'Number of Roles', #member.roles},
+
+		{'Creation Date', os.date("%d.%B %Y", user.createdAt)},
+		{'Join Date', member.joinedAt}
+	}
+	local outString = ""
+	for _,v in pairs(content) do
+		outString = outString .. string.format("\n**%s:**   %s", v[1], v[2])
+	end
+
+	-- Add emojis:
+	local emoji = " "
+	if Message.guild.owner == member then
+		emoji = emoji .. ":crown:"
+	end
+	if user.bot then
+		emoji = emoji .. ":robot:"
+	end
+	if member.premiumSince then
+		emoji = emoji .. ":rocket:"
+	end
+
+	-- Colour:
+	local colour = member.highestRole.color
+	if colour == 0 then
+		colour = Colours.embeds.default
+	end
+
+	-- Activity:
+	local statusTable = {
+		['online'] = ":green_circle:",
+		['offline'] = ":black_circle:",
+		['idle'] = ":crescent_moon:",
+		['dnd'] = ":red_circle:"
+	}
+	local status = statusTable[member.status] or ""
+
+	Message:reply { embed = {
+		title = status .. " User Profile for " .. user.tag .. emoji,
+		description = outString,
+		thumbnail = {
+			url = user.avatarURL
+		},
+		color = colour
+	}}
+end)
+
 
 -- Math:
 add("flip", "Flip a coin.", commandType.math, function(Message, Caller, ...)
@@ -165,8 +262,7 @@ add("flip", "Flip a coin.", commandType.math, function(Message, Caller, ...)
 	}}
 end)
 
-add("ynm", "Yes? No? Maybe? Ask me a question!", commandType.math, function(Message, Caller, ...)
-	local args = ...
+add("ynm", "Yes? No? Maybe? Ask me a question!", commandType.math, function(Message, Caller, args, ...)
 	local temp = string.format(YesNoMaybe.askMeSomethingPrompt, Message.author.mentionString)
 	if args == nil then
 		Message.channel:send(temp)
@@ -188,9 +284,7 @@ add("ynm", "Yes? No? Maybe? Ask me a question!", commandType.math, function(Mess
 	Message.channel:send(string.format(YesNoMaybe.responsePrompt, out, Message.author.mentionString))
 end)
 
-add("pickrandom", "Pick a random word from a string input (seperated by spaces).", commandType.math, function(Message, Caller, ...)
-	local args = ...
-
+add("pickrandom", "Pick a random word from a string input (seperated by spaces).", commandType.math, function(Message, Caller, args, ...)
 	local function throwError()
 		local err = "Please provide a string from which words can be randomly picked."
 		local usage = "pickrandom option1 option2 option3 long_option_four option.5 (-> randomly chosen)"
@@ -213,7 +307,7 @@ add("pickrandom", "Pick a random word from a string input (seperated by spaces).
 	}}
 end)
 
-add("checklove", "Check the love value between two members.", commandType.math, function(Message, Caller, ...)
+add("checklove", "Check the love value between two members.", commandType.math, function(Message, Caller, args, ...)
 	local mentioned = Message.mentionedUsers
 	local usage = "checklove @FirstMember @SecondMember"
 	if #mentioned < 2 then
@@ -234,8 +328,7 @@ add("checklove", "Check the love value between two members.", commandType.math, 
 	}}
 end)
 
-add("checktruth", "Check the truth-value of a given statement.", commandType.math, function(Message, Caller, ...)
-	local args = ...
+add("checktruth", "Check the truth-value of a given statement.", commandType.math, function(Message, Caller, args, ...)
 	local usage = "checktruth This String Will Be Evaluated For The Truth Value"
 
 	local function handleErrorMessage(txt, ...)
@@ -276,18 +369,17 @@ add("checktruth", "Check the truth-value of a given statement.", commandType.mat
 	}}
 end)
 
-add("roll", "Roll a die. (Supports `roll int int` and `roll string`(-> String: '2d6', '4d20') )", commandType.math, function(Message, Caller, ...)
-	local arg = ...
+add("roll", "Roll a die. (Supports `roll int int` and `roll string`(-> String: '2d6', '4d20') )", commandType.math, function(Message, Caller, args, ...)
 	local default = "1d6"
 	local roll = default
 	local maxRolls = 100
 
 	-- Set roll to custom XdY string:
-	if arg[1] ~= nil and arg[2] == nil then
-		roll = tostring(arg[1]):lower()
+	if args[1] ~= nil and args[2] == nil then
+		roll = tostring(args[1]):lower()
 	end
-	if arg[1] ~= nil and arg[2] ~= nil then
-		roll = tostring(arg[1]) .. "d" .. tostring(arg[2])
+	if args[1] ~= nil and args[2] ~= nil then
+		roll = tostring(args[1]) .. "d" .. tostring(args[2])
 	end
 
 	-- Seperate t and d from string:
@@ -317,7 +409,7 @@ add("roll", "Roll a die. (Supports `roll int int` and `roll string`(-> String: '
 	-- Make d not more than maxRolls:
 	local warning = ""
 	if t > maxRolls then
-		warning = string.format("Maximum rolls are limited to %d!\n\n", maxRolls)
+		warning = string.format("Maximum rolls are limited to %d!\n", maxRolls)
 		t = maxRolls output = output .. warning
 	end
 	local rolls = {}
@@ -336,36 +428,30 @@ add("roll", "Roll a die. (Supports `roll int int` and `roll string`(-> String: '
 	end
 	stats.average = stats.sum / t
 
-	output = output .. string.format("**All rolls:** %s\n\n**Sum of all rolls:** %d\n**Average roll:** %d", stats.concat, stats.sum, stats.average)
+	output = output .. string.format("\n**All rolls:** %s\n\n**Sum of all rolls:** %d\n**Average roll:** %d", stats.concat, stats.sum, stats.average)
 	if not (Message:reply { embed = {
 		title = "Die Roll",
-		description = string.format(warning .. "You rolled a %d-sided die %d times! Here are your results:", d, t),
+		description = string.format(warning .. "__You rolled a %d-sided die %d times! Here are your results:__\n\n%s", d, t, tostring(stats.concat)),
 		fields = {
 			{
 				name = "__Average Sides:__",
 				value = tostring(stats.average),
-				inline = false
+				inline = true
 			},
 			{
 				name = "__Sum of all Sides:__",
 				value = tostring(stats.sum),
-				inline = false
-			},
-			{
-				name = "__All rolls:__",
-				value = tostring(stats.concat),
-				inline = false
+				inline = true
 			}
 		},
 		color = Colours.embeds.default
 	}}) then
 		Message:reply("Embed message could not be sent, contained too many characters?")
-		Message.channel:send(output)
+		--Message.channel:send(output)
 	end
 end)
 
-add("convert", "Convert units of measurement.", commandType.math, function(Message, Caller, ...)
-	local args = ...
+add("convert", "Convert units of measurement.", commandType.math, function(Message, Caller, args, ...)
 	-- Table of units: (base unit is valued as 1)
 	local units = Units.list
 
@@ -485,8 +571,11 @@ local function handleSocialEvent(Message, Caller, type, textAction, emojis)
 	local passive = Message.mentionedUsers["first"].mentionString
 	local text = textAction .. " you"
 	local emoji = emojis[1]
+
 	local gifs = Gifs[type]
-	local gif = easy.table.randomIn(gifs)
+	local gifInfo = { id = 0, total = 0}
+	local gif = nil
+	gif, gifInfo.id, gifInfo.total = easy.table.randomIn(gifs)
 
 	-- User @'ed themselves:
 	if active == passive then
@@ -499,49 +588,106 @@ local function handleSocialEvent(Message, Caller, type, textAction, emojis)
 
 	-- Return the full string, ready to be sent:
 	Message:reply { embed = {
-		title = easy.string.firstUppercase("Someone has been " .. textAction),
+		title = easy.string.firstUppercase("You have been %s!", textAction),
 		description = string.format("%s %s %s! %s", active, text, passive, emoji),
 		image = {
 			url = gif
+		},
+		footer = {
+			text = string.format("gif id: %d (out of %d)", gifInfo.id, gifInfo.total)
 		},
 		color = Colours.list.pink
 	}}
 end
 
-add("hug", "Hug another server member. :)", commandType.social, function(Message, Caller, ...)
+add("hug", "Hug another server member. :)", commandType.social, function(Message, Caller, args, ...)
 	handleSocialEvent(
 		Message, Caller,
 		"hug", "hugged",
 		{":)", ";) <3"}
 	)
 end)
-add("pat", "Pat another server memeber. :D", commandType.social, function(Message, Caller, ...)
+add("pat", "Pat another server memeber. :D", commandType.social, function(Message, Caller, args, ...)
 	handleSocialEvent(
 		Message, Caller,
 		"pat", "patted",
 		{"-v-", "^v^"}
 	)
 end)
-add("slap", "Slap another server member. >:(", commandType.social, function(Message, Caller, ...)
+add("slap", "Slap another server member. >:(", commandType.social, function(Message, Caller, args, ...)
 	handleSocialEvent(
 		Message, Caller,
 		"slap", "slapped",
 		{">:(", ">:O"}
 	)
 end)
-add("kiss", "Kiss another server member. :3", commandType.social, function(Message, Caller, ...)
+add("kiss", "Kiss another server member. :3", commandType.social, function(Message, Caller, args, ...)
 	handleSocialEvent(
 		Message, Caller,
 		"kiss", "kissed",
 		{":3", ";3 <3"}
 	)
 end)
-add("boop", "Boop another server member. -v-", commandType.social, function(Message, Caller, ...)
+add("boop", "Boop another server member. -v-", commandType.social, function(Message, Caller, args, ...)
 	handleSocialEvent(
 		Message, Caller,
 		"boop", "booped",
 		{":p", ";p"}
 	)
+end)
+
+add("date", "Date a server member o///o", commandType.social, function(Message, Caller, args, ...)
+	local mentioned = Message.mentionedUsers
+	local usage = "date @AnotherUser"
+	if mentioned == nil then
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "Make sure to ping a different user you want to ask out.", usage)}
+		return
+	end
+
+	local targetUser = mentioned['first']
+	if targetUser == nil then
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "Make sure to ping a different user you want to ask out.", usage)}
+		return
+	end
+
+	if targetUser.id == Message.author.id then
+		Message:reply { embed = {
+			title = "Damn, that's sad...",
+			description = "Want me to hug you maybe?",
+			color = Colours.embeds.default
+		}}
+		return
+	end
+
+	local emoji = { accept = "❤️", refuse = "💔" }
+	local date_msg = Message:reply { embed = {
+		title = "You have been asked out!",
+		description = string.format("%s asked out %s!\nReact with %s to accpet or %s to refuse.", Message.author.mentionString, targetUser.mentionString, emoji.accept, emoji.refuse),
+		color = Colours.embeds.notice
+	}}
+
+	local function dateAccept()
+		Message:reply { embed = {
+			title = Dating:getTitle("success"),
+			description = Dating:getDescription(Message.author, targetUser),
+			color = Colours.embeds.default
+		}}
+	end
+	local function dateRefuse()
+		Message:reply { embed = {
+			title = Dating:getTitle("failed"),
+			description = string.format("%s refused the date invitation of %s.", targetUser.mentionString, Message.author.mentionString),
+			color = Colours.embeds.error
+		}}
+	end
+
+	if date_msg then
+		date_msg:addReaction(emoji.accept)
+		date_msg:addReaction(emoji.refuse)
+		MessageReaction:add(date_msg, {[emoji.accept] = dateAccept, [emoji.refuse] = dateRefuse}, nil, targetUser.id, false, true)
+	else
+		Message:reply { embed = getErrorMessageEmbed("Internal", "The bot ran into an issue, please try again later...", usage)}
+	end
 end)
 
 

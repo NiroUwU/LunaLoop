@@ -22,6 +22,10 @@ info = {
 return info
 ```
 
+## Screenshots
+
+<img title="" src=".git-pictures/info_help.png" alt="Help and Info command" data-align="inline" width="261"> <img title="" src=".git-pictures/start_script.png" alt="Start Script" width="292">
+
 ## Dependancies
 
 Included in this Repository:
@@ -35,7 +39,7 @@ Required on your system:
 + curl
 
 + [Luvit runtime](https://github.com/luvit/luvit)
-
+  
   + Lua 5.2 (comes bundled with Luvit)
 
 ## Supported Systems
