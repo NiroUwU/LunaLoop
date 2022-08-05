@@ -9,6 +9,7 @@ MessageReaction.list = {}
 --@param repeatableExecution must be a boolean (removes message from memory if false)
 --@param repeatableFail must be a boolean (surpressed removing if reaction failed)
 function MessageReaction:add(Message, successReactionTable, failFunction, targetUserID, repeatableExecution, repeatableFail)
+	bot.debug("Adding Message id '%s' to memory", Message.id)
 	local temp = {
 		Message = Message,
 		repeatable = {
@@ -28,6 +29,7 @@ function MessageReaction:add(Message, successReactionTable, failFunction, target
 	end
 
 	MessageReaction.list[Message.id] = temp
+	bot.debug("Added Message id '%s' to memory", Message.id)
 end
 function MessageReaction:remove(Message)
 	bot.debug("MessageReaction: Removing message id '%s'!", tostring(Message.id))

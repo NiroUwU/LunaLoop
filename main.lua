@@ -21,18 +21,29 @@ local function getGlobalErrorMessage()
 end
 
 local function attemptCommandExecution(Message, commandString, args, ...)
-	for i, v in pairs(CommandList.list) do
-		if i == commandString then
-			bot.debug("Executing command '%s'!", commandString)
+	local function tryThisCommand(name, ...)
+		bot.debug("Executing command '%s'!", commandString)
 
-			table.remove(args, 1)
-			v.fn(Message, Message.author, args, ...)
+		table.remove(args, 1)
+		name.fn(Message, Message.author, args, ...)
+		return
+	end
+	for i, v in pairs(CommandList.list) do
+		-- Try real command name:
+		if i == commandString then
+			tryThisCommand(v, ...)
 			return
+		end
+		-- Try all alias command names:
+		for _,k in pairs(v.aliases) do
+			if k == commandString then
+				tryThisCommand(v, ...)
+				return
+			end
 		end
 	end
 	bot.debug("Command '%s' was not found!", commandString)
 end
-
 
 local function updateProfile()
 	Client:setUsername(info.name)
@@ -57,12 +68,8 @@ Client:on("messageCreate", function(Message)
 	}
 
 	-- Check if Message content is empty:
-	if Message.content == nil or #messageData.rawString < 1 then
-		--bot.debug("Got message with no content, exiting!")
-		return
-	else
-		--bot.debug("Got message: '%s'", messageData.rawString)
-	end
+	if Message.content == nil or #messageData.rawString < 1 then return end
+
 	-- Check if Member ID is blocked:
 	for _, id in pairs(BannedIDs) do
 		if id == Message.author.id then

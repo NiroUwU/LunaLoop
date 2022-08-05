@@ -69,4 +69,12 @@ Added Functionality:
 - Bot can now listen and respond to reactions by users on specific messages (very big)
 ]]
 
+Changelog['v1.3.0'] = [[
+Added Commands:
+- rps (Rock paper scissors, utilising reactions to a bot message)
+
+Added Functionality:
+- Commands now have the capablility to have aliases (for example: 'info' and 'botinfo' both execute the info-command)
+]]
+
 return Changelog

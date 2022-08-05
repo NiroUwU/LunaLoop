@@ -1,5 +1,5 @@
 BotProfile = {
-	playing = "=help"
+	playing = string.format("%shelp", info.prefix)
 }
 
 BotProfile.status = string.format([[

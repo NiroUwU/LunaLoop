@@ -10,47 +10,63 @@ Dating.titles = {
 }
 
 Dating.activities = {
-	['went to'] = {
-		['a'] = {
-			"bar", "fancy restaurant",
-			['mall and got themselves'] = {
-				['some'] = {"ice cream", "plushies", "bubble-tea"},
-				"matching T-shirts"
+	['went'] = {
+		"ice scating", "hiking", "shopping", "skiing",
+		['to'] = {
+			['a'] = {
+				"bar", "fancy restaurant",
+				['mall and got themselves'] = {
+					['some'] = {"ice cream", "plushies", "bubble-tea"},
+					"matching T-shirts"
+				},
+				['library and read'] = {
+					['the'] = {"bible", "dictionary"},
+					"their favourite books"
+				}
 			},
-			['library and read'] = {
-				['the'] = {"bible", "dictionary"},
-				"their favourite books"
+			['an'] = {
+				"amusement park"
+			},
+			['the'] = {
+				"zoo", "beach", "swimming pool",
+				["local park"] = {
+					"", "and yelled at children", "and fed some ducks", "and relaxed", "and watched birds"
+				}
 			}
-		},
-		['the'] = {
-			["local park"] = {
-				"", "and yelled at children", "and fed some ducks", "and relaxed", "and watched birds"
-			}, "zoo", "beach", "swimming pool"
 		}
 	},
 	['made'] = {
-		"a cake",
+		"a cake", "cookies", "pancakes", "a pizza",
 		["friends with stray"] = {"cats", "dogs"}
 	},
 	['stayed at home and'] = {
 		"played video games",
 		['drew a picture of'] = {
-			['their'] = {"dream house", "favourite snacks"},
-			"beautiful scenaries",
-			"their favourite animals"
+			"beautiful scenaries", "themselves",
+			['their'] = {"dream house", "favourite snacks", "favourite animals"}
 		},
 		['listened to'] = {"comfy music", "romantic music", "classical music", "rap music", "metal songs", "emo songs", "disney music"},
 		["watched"] = {"a movie", "cat videos", "tutorials on how to install linux"}
 	},
 	['drank'] = {
-		"quality wine", "beer", "water from the city fountain"
+		"some quality wine", "beer", "water from the city fountain", "coffee", "bubble-tea"
 	},
 	['ate'] = {
-		"their favourite meals",
-		"ate chocolate, then learned it had peanut butter, which one of them is allergic to, and went to the doctor"
+		"their favourite meals", "chocolate, then learned it had peanut butter, which one of them is allergic to, and went to the doctor",
+		"their favourite snacks"
 	},
 	['joined'] = {
-		"a cult"
+		"a cult", "a music band"
+	},
+	['threw'] = {
+		"a party",
+		['rocks at'] = {"cars", "children", "homeless people"}
+	},
+	['posted'] = {
+		"memes in #general and got banned"
+	},
+	['created'] = {
+		"a music band", "YouTube videos", "cringy TikTok videos"
 	}
 }
 
