@@ -109,14 +109,13 @@ add("ping", {}, "Pong! :D", commandType.technical, function(Message, Caller, arg
 	}}
 end)
 
-add("changelog", {}, "Shows the changelog for the current or a specific version of the bot.", commandType.technical, function(Message, Caller, args, ...)
-	local arg = ...
+add("changelog", {"changes"}, "Shows the changelog for the current or a specific version of the bot.", commandType.technical, function(Message, Caller, args, ...)
 	local showVersion = ""
-	bot.debug(tostring(arg))
-	if #arg == 0 then
+	bot.debug(tostring(args))
+	if #args == 0 then
 		showVersion = info.version
 	else
-		showVersion = arg[1]
+		showVersion = args[1]
 	end
 
 	if Changelog[showVersion] == nil then
