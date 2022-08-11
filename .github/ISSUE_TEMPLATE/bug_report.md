@@ -1,11 +1,19 @@
 ---
 name: Bug report
-about: Create a report to help us improve
-title: Untitled Bug Report
+about: Report a bug, that you want to be fixed!
+title: Unnamed Bug Report
 labels: bug
 assignees: NiroUwU
 
 ---
 
-Please describe what the issue is, which command caused it and under which circumstances.
-(Screenshots highly welcomed!)
+**When does the issue occur?**
+for example: "happens when executing xyz command"
+...
+
+**What happens and what would be the expected result?**
+for example: "it should do xyz, but it does zyx"
+...
+
+**Additional Descriprion:**
+...

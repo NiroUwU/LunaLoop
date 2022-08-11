@@ -1,11 +1,17 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
-title: ''
-labels: ''
-assignees: ''
+about: Suggest an idea or feature
+title: Unnamed Feature Request
+labels: enhancement
+assignees: NiroUwU
 
 ---
 
-Please describe what you would want in the bot.
-Command suggestions and other suggestions are welcomed!
+**Describe what you would like to be changed/added:**
+...
+
+**Please explain why you would want to have this changed/added:**
+...
+
+**Additional description:**
+...
