@@ -1,6 +1,7 @@
 bot = {
 	isdebug = false,
-	time = {}
+	time = {},
+	user = {}
 }
 
 -- Debug text output:

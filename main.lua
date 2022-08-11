@@ -26,7 +26,6 @@ local function attemptCommandExecution(Message, commandString, args, ...)
 
 		table.remove(args, 1)
 		name.fn(Message, Message.author, args, ...)
-		return
 	end
 	for i, v in pairs(CommandList.list) do
 		-- Try real command name:
@@ -57,8 +56,14 @@ Client:on("ready", function()
 	updateProfile()
 	bot.time.setStartup()
 	bot.debug("Bot started: %s", os.date())
+	bot.user = Client.user
+
+	-- Legacy (i am extremly lazy, okay??):
+	info.id = bot.user.id
 end)
 
+
+-- Message Sent Event: (listening to commands/keywords)
 Client:on("messageCreate", function(Message)
 	local messageData = {
 		object = Message,
@@ -105,6 +110,7 @@ Client:on("messageCreate", function(Message)
 end)
 
 
+-- Add Reaction Event: (listening to reactions for messages saved in memory for listening)
 Client:on("reactionAdd", function(Reaction, CallerID)
 	local Message = Reaction.message
 	local msg = MessageReaction.list[Message.id]
@@ -127,5 +133,5 @@ Client:on("reactionAdd", function(Reaction, CallerID)
 end)
 
 
-
-Client:run('Bot ' .. info.token)
+-- Run bot with token:
+Client:run(string.format('Bot %s', info.token))

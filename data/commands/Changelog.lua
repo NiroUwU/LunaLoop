@@ -77,4 +77,13 @@ Added Functionality:
 - Commands now have the capablility to have aliases (for example: 'info' and 'botinfo' both execute the info-command)
 ]]
 
+Changelog['v1.3.1'] = [[
+Fixed Issues:
+- Gifs not displayed with social commands
+
+Other:
+- a lot more gifs, including some cat gifs -v-
+- removed required ID, automated through Discord API (api token magic)
+]]
+
 return Changelog

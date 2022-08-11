@@ -4,7 +4,6 @@ echo -e "\nWelcome to the setup script!\nPlease put in the following information
 
 printf "Name for your Bot: " && read NAME
 printf "Bot Prefix: " && read PREFIX
-printf "Bot ID: " && read ID
 printf "Bot Token: " && read TOKEN
 printf "Invite Link (optional): " && read INVITE
 
@@ -14,7 +13,6 @@ info = {
 	name = '$NAME',
 	version = globalInfo.version,
 	prefix = '$PREFIX',
-	id = '$ID',	
 	token = '$TOKEN',
 	invite = '$INVITE',
 	repository = 'https://github.com/NiroUwU/LunaLoop'
