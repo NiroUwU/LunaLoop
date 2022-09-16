@@ -36,6 +36,8 @@ Required on your system:
 
 + bash
 
++ git
+
 + curl
 
 + [Luvit runtime](https://github.com/luvit/luvit)
