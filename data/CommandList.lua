@@ -16,6 +16,7 @@ local function add(Name, Aliases, Desc, Type, Func)
 end
 local commandType = {
 	technical = "Technical",
+	admin = "Administrative",
 	chat = "Chatting",
 	social = "Social",
 	math = "Math"
@@ -28,15 +29,75 @@ local function getErrorMessageEmbed(errorType, errormessage, usage)
 	else
 		errorType = easy.string.firstUppercase(tostring(errorType)) .. " "
 	end
-	return {
+
+	local temp = {
 		title = errorType .. "Error",
 		description = errormessage,
-		footer = {
-			text = "Usage:\n" .. usage
-		},
 		color = Colours.embeds.error
 	}
+	if usage ~= nil then
+		temp.footer = {
+			text = "Usage:\n" .. usage
+		}
+	end
+	return temp
 end
+
+
+-- Administrative: (still WIP, does literally nothing at the moment)
+add("settings", {}, "Edit server-specific settings (requires administrator). (WIP)", commandType.admin, function(Message, Caller, args, ...)
+	local usage = "settings set setting_name true\nsettings add setting_name2 new_entry"
+	Caller = Message.member
+
+	-- Not in server:
+	if not Caller then
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "Please execute this command in a server!", usage)}
+		return
+	end
+
+	-- Check if member has privileges:
+	local guild = Message.guild
+	if guild.owner.user.id ~= Caller.user.id then
+		Message:reply { embed = getErrorMessageEmbed("Permission", "You lack the needed permissions to execute this command.", usage)}
+		return
+	end
+
+	-- Check if arguments present:
+	if #args < 1 then
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "Please provide arguments as inputs.", usage)}
+		return
+	end
+
+	-- Update server settings:
+	--ServerSetting:update(guild.id)
+	local currentsettings = ServerSetting.list[guild.id]
+
+	local allfunctions = {
+		['update'] = {
+			desc = "Refreshes the current settings.",
+			fn = function()
+				ServerSetting:update(guild.id)
+				return "Successfully refreshed server settings!"
+			end
+		},
+		['list'] = {
+			desc = "",
+			fn = function()
+				local temp = ""
+				for i,v in pairs(ServerSetting.list[guild.id]) do
+					temp = temp .. string.format("__ %s: __  %s", tostring(i), tostring(v))
+				end
+				return tostring(temp)
+			end
+		},
+		['add'] = {
+			desc = "Add a value to a list",
+			fn = function() end
+		}
+	}
+	--Message:reply(allfunctions['list'].fn())
+	--ServerSetting:update(guild.id)
+end)
 
 
 -- Technical:
@@ -44,7 +105,13 @@ add("info", {"botinfo", "bot-info", "bot", "i"}, "Displays info about the bot.",
 	Message:reply { embed = InfoCommandData.getFullTable()}
 end)
 
-add("apple", {}, "Test reaction response, spoiler: it SHOULD work", commandType.technical, function(Message, Caller, args, ...)
+add("neofetch", {}, "Displays the systems neofetch command the bot is running on (Waring: Nerd Alert).", commandType.technical, function(Message, Caller, args, ...)
+	local cmd = 'neofetch --color_blocks off | sed \'s/\x1B\\[[0-9;\\?]*[a-zA-Z]//g\''
+	local neofetch = bash.execute("neofetch.temp", cmd)
+	Message:reply(string.format("```\n%s\n```", neofetch))
+end)
+
+add("apple", {"testreaction", "test-reaction", "appletest", "apple-test"}, "Test reaction response, spoiler: it SHOULD work", commandType.technical, function(Message, Caller, args, ...)
 	local emoji = "🍎"
 	local secret_emoji = "🍏"
 	local sentMessage = Message:reply { embed = {
@@ -109,7 +176,7 @@ add("ping", {}, "Pong! :D", commandType.technical, function(Message, Caller, arg
 	}}
 end)
 
-add("changelog", {"changes"}, "Shows the changelog for the current or a specific version of the bot.", commandType.technical, function(Message, Caller, args, ...)
+add("changelog", {"changes", "whatsnew", "whatsnew?", "update", "updates"}, "Shows the changelog for the current or a specific version of the bot.", commandType.technical, function(Message, Caller, args, ...)
 	local showVersion = ""
 	bot.debug(tostring(args))
 	if #args == 0 then
@@ -141,11 +208,12 @@ end)
 
 
 -- Chatting:
-add("echo", {"print", "say"}, "I will echo back whatever you said to me.", commandType.chat, function(Message, Caller, args, ...)
+local function getEchoObject(Message, args)
 	local tab = args
+	local usage = "echo [string]"
 	if #tab == 0 then
 		local err = "Insufficient Arguments. You have to provide a string for me to echo back!"
-		Message:reply { embed = getErrorMessageEmbed("Syntax", err, "echo [string]")}
+		Message:reply { embed = getErrorMessageEmbed("Syntax", err, usage)}
 		return
 	end
 	local str = table.concat(tab, " ")
@@ -154,20 +222,31 @@ add("echo", {"print", "say"}, "I will echo back whatever you said to me.", comma
 		description = str,
 		author = {
 			name = Message.author.username,
-			icon_url = Message.author.avatarURL
+			icon_url = Message.author.avatarURL,
+			url = string.format("https://%s.id", Message.author.id)
 		},
-		color = Colours.embeds.default
+		color = Colours.embeds.default,
+		footer = {
+			text = Message.author.id
+		}
 	}}
+end
+
+add("echo", {"print", "say", "puts", "printf"}, "I will echo back whatever you said to me.", commandType.chat, function(Message, Caller, args, ...)
+	Message:reply { embed = getEchoObject(Message, args)}
 end)
 
-add("hello", {"hi"}, "Greet me, I greet you.", commandType.chat, function(Message, Caller, ...)
-	--[[
-	Message:reply { embed = {
-		title = HelloResponse[math.random(1, #HelloResponse)],
-		color = Colours.embeds.default
-	}}
-	]]
-	Message.channel:send(HelloResponse[math.random(1, #HelloResponse)])
+add("echodel", {"echodelete", "echorem", "echoremove"}, "Echos back a message, and deletes the senders message.", commandType.chat, function(Message, Caller, args, ...)
+	Message:reply { embed = getEchoObject(Message, args)}
+
+	-- Delete message, if fails, send message about missing permissions:
+	if not Message:delete() then
+		Message:reply { embed = getErrorMessageEmbed("Permission", "The bot may not have permissions to delete messages.")}
+	end
+end)
+
+add("hello", {"hi"}, "Greet me, and I greet you.", commandType.chat, function(Message, Caller, ...)
+	Message:reply(HelloResponse[math.random(1, #HelloResponse)])
 end)
 
 add("profile", {"p"}, "Display a server member's profile.", commandType.chat, function(Message, Caller, args, ...)
@@ -368,7 +447,8 @@ add("checktruth", {"truth-o-meter", "true", "thruth"}, "Check the truth-value of
 	local out = tostring(percentage % 101) .. "%"
 	Message:reply { embed = {
 		title = "Truth check",
-		description = string.format("The truth value for... `%s`... is **%s**!", fullString, out)
+		description = string.format("The truth value for... `%s`... is **%s**!", fullString, out),
+		color = Colours.embeds.default
 	}}
 end)
 

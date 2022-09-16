@@ -86,4 +86,13 @@ Other:
 - removed required ID, automated through Discord API (api token magic)
 ]]
 
+Changelog['v1.3.2'] = [[
+Added Commands:
+- neofetch (warning: nerd alert!)
+- settings (not yet working, WIP)
+
+Other:
+- organised file structure
+]]
+
 return Changelog

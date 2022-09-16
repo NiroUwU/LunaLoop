@@ -2,10 +2,10 @@
 
 echo -e "\nWelcome to the setup script!\nPlease put in the following information as asked by this script :)\n"
 
-printf "Name for your Bot: " && read NAME
-printf "Bot Prefix: " && read PREFIX
-printf "Bot Token: " && read TOKEN
-printf "Invite Link (optional): " && read INVITE
+echo -e "Name for your Bot: \c" && read -r NAME
+echo -e "Bot Prefix: \c" && read -r PREFIX
+echo -e "Bot Token: \c" && read -r TOKEN
+echo -e "Invite Link (optional): \c" && read -r INVITE
 
 
 echo "-- These are the bot information needed to connect to your discord application:

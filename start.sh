@@ -16,6 +16,7 @@ function beforeBotRun() {
 
 	# Execute first time setup, if file "info.lua" not found:
 	[ -f "info.lua" ] || $PATH_scripts/setup.sh
+	$PATH_scripts/update_file_structure.sh
 }
 function runBot() {
 	luvit main.lua || printf "Bot ran into an issue!\n"

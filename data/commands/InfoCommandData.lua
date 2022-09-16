@@ -6,13 +6,41 @@ InfoCommandData = {
 	fields = {}
 }
 
+-- Functions:
+
+local function getOSInformation()
+	-- This is totally not a workaround, ignore this:
+	if bash == nil then return "Soon:tm:" end
+	local sf = string.format
+
+	local OS = bash.execute("uname.temp", "uname -o")
+
+	local results = {
+		sf("Running on: %s", OS)
+	}
+	return table.concat(results)
+end
+
+
 -- Data:
+local function setAuthor()
+	return {
+		name = "Click here to invite me!",
+		url = info.invite,
+		icon_url = bot.user.avatarURL
+	}
+end
+
 local function setTitle()
 	return info.name .. " Bot Information"
 end
 
 local function setDesc()
-	return "This is the info command, it displays interesting and nerdy information about this bot!"
+	local fulldesc = {
+		"This is the info command, it displays interesting and nerdy information about this bot!",
+		string.format("This bot is open source. Click [here](%s) to see the source code!", info.repository)
+	}
+	return table.concat(fulldesc, "\n")
 end
 
 local function setColour()
@@ -39,23 +67,25 @@ local function setFields()
 		},
 		{
 			name = "__Technical Information:__",
-			value = "Soon:tm:",
+			value = getOSInformation(),
 			inline = true
 		}
 	}
 end
 
 local function update()
-	InfoCommandData.fields = setFields()
-	InfoCommandData.description = setDesc()
+	InfoCommandData.author = setAuthor()
 	InfoCommandData.title = setTitle()
-	InfoCommandData.colour = setColour()
+	InfoCommandData.description = setDesc()
+	InfoCommandData.fields = setFields()
 	InfoCommandData.footer = setFooter()
+	InfoCommandData.colour = setColour()
 end
 
 function InfoCommandData.getFullTable()
 	update()
 	return {
+		author = InfoCommandData.author,
 		title = InfoCommandData.title,
 		description = InfoCommandData.description,
 

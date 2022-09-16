@@ -2,10 +2,14 @@
 
 -- Variables:
 Discordia = require "discordia"
-Class = Discordia.class
-Client = Discordia.Client()
+require "src/import"
 
-require "import"
+Class = Discordia.class
+Client = Discordia.Client {
+	logFile = "logs/discordia.log",
+	gatewayFile = "logs/gateway.json"
+}
+
 bot.isDebug = true
 switch = Switch.switch
 
@@ -60,10 +64,13 @@ Client:on("ready", function()
 
 	-- Legacy (i am extremly lazy, okay??):
 	info.id = bot.user.id
+
+	-- Add bot to ignored IDs list:
+	table.insert(BannedIDs, bot.user.id)
 end)
 
 
--- Message Sent Event: (listening to commands/keywords)
+-- Listening for commands:
 Client:on("messageCreate", function(Message)
 	local messageData = {
 		object = Message,
@@ -74,6 +81,9 @@ Client:on("messageCreate", function(Message)
 
 	-- Check if Message content is empty:
 	if Message.content == nil or #messageData.rawString < 1 then return end
+
+	-- Check if Message was sent by a bot user, ignore if true:
+	if Message.author.bot then return end
 
 	-- Check if Member ID is blocked:
 	for _, id in pairs(BannedIDs) do
@@ -104,9 +114,6 @@ Client:on("messageCreate", function(Message)
 			messageData.split                                                                 -- Raw Message Fragments (will be transformed into args)
 		)
 	end
-
-	-- Find Substring, react to it: (still broken... ;w;)
-	-- findMessageSubstring(Message, messageData)
 end)
 
 
@@ -116,19 +123,20 @@ Client:on("reactionAdd", function(Reaction, CallerID)
 	local msg = MessageReaction.list[Message.id]
 	bot.debug("Bot observed an emoji reaction '%s' by %s", Reaction.emojiName, tostring(CallerID))
 
+	-- Check if reaction was added by a blocked user:
 	for i=0, #BannedIDs do
 		if CallerID == BannedIDs[i] then
-			bot.debug("Blocked user reacted to message, ignoring.")
+			bot.debug("Blocked user reacted to message. Ignoring reaction.")
 			return
 		end
 	end
 
-	-- Check if message stored in memory:
+	-- Check if message is stored in memory:
 	if not msg then
-		bot.debug("Message with the id '%s' not saved in memory!", Message.id)
+		bot.debug("Message with the id '%s' not saved in memory! Ignoring reaction.", Message.id)
 		return
 	end
-	bot.debug("Executing saved message id '%s' function!", Message.id)
+	bot.debug("Executing saved message (id: '%s') function (name: '%s')!", Message.id, Reaction.emojiName)
 	MessageReaction:execute(Message, Reaction, CallerID)
 end)
 

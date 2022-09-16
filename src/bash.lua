@@ -32,4 +32,18 @@ function bash.execute(fileOutput, cmd, ...)
 	return result
 end
 
+function bash.mkdir(dir, ...)
+	if not dir then return end
+	dir = string.format(dir, ...)
+	run("mkdir %s", dir)
+end
+
+function bash.touch(file, content)
+	if not file then return end
+	run("touch %s", file)
+	if content ~= nil then
+		run("echo '%s' > %s", tostring(content), file)
+	end
+end
+
 return bash

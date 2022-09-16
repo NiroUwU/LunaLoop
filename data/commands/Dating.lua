@@ -11,7 +11,7 @@ Dating.titles = {
 
 Dating.activities = {
 	['went'] = {
-		"ice scating", "hiking", "shopping", "skiing",
+		"ice skating", "hiking", "shopping", "skiing",
 		['to'] = {
 			['a'] = {
 				"bar", "fancy restaurant",

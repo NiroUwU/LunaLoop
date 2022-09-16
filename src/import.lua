@@ -1,8 +1,11 @@
+-- Decides if feedback about module loading should be printed to console:
+local doOutput = false
+
 local path = ""
 -- Switches Path:
 local function cd(newPath)
 	path = newPath
-	print("\n🔍 Loading in:     *" .. newPath .. "*")
+	if doOutput then print("\n🔍 Loading in:     *" .. newPath .. "*") end
 end
 
 -- Loads a module:
@@ -21,7 +24,7 @@ local function load(request)
 	end
 
 	-- Return Module:
-	print(out .. gap ..  "(" .. location .. ")")
+	if doOutput then print(out .. gap ..  "(" .. location .. ")") end
 	modCount = modCount + 1
 	return mod
 end
@@ -32,6 +35,7 @@ bot = load "bot"
 easy = load "easy"
 filehandler = load "filehandler"
 bash = load "bash"
+jsonfile = load "jsonfile"
 
 
 -- Libraries:
@@ -39,6 +43,7 @@ cd("lib")
 --Class  = load "class"  -- https://github.com/vrld/hump/blob/master/class.lua
 Switch = load "Switch" -- https://github.com/NiroUwU/Lua-Utils/blob/main/Switch.lua
 base64 = load "base64" -- https://github.com/iskolbin/lbase64/blob/master/base64.lua
+json   = load "json"   -- https://github.com/rxi/json.lua
 
 -- Import General Data About the Bot
 cd("")
@@ -49,6 +54,7 @@ info = load "info"
 cd("src/class")
 load "Command"
 load "MessageReaction"
+load "ServerSetting"
 --load "MessageSubstring"
 
 -- Import Data:
@@ -61,7 +67,6 @@ load "Colours"
 
 -- Command Data:
 cd("data/commands")
-load "ReactionList"
 load "Units"
 load "HelloResponse"
 load "Gifs"
