@@ -95,4 +95,12 @@ Other:
 - organised file structure
 ]]
 
+Changelog['v1.3.3'] = [[
+Added Functionality:
+- Goodies (gain goodies by talking to people on discord servers, which will be later used in some commands)
+
+Other:
+- organised file structure again :)
+]]
+
 return Changelog

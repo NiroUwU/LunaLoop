@@ -13,6 +13,9 @@ Client = Discordia.Client {
 bot.isDebug = true
 switch = Switch.switch
 
+-- Due to my inability to remember my own code structure:
+easy.debug = bot.debug
+
 -- Functions:
 local function getGlobalErrorMessage()
 	return {
@@ -83,7 +86,7 @@ Client:on("messageCreate", function(Message)
 	if Message.content == nil or #messageData.rawString < 1 then return end
 
 	-- Check if Message was sent by a bot user, ignore if true:
-	if Message.author.bot then return end
+	if Message.author.bot and not Config.commands.allow_bots then return end
 
 	-- Check if Member ID is blocked:
 	for _, id in pairs(BannedIDs) do
@@ -114,6 +117,15 @@ Client:on("messageCreate", function(Message)
 			messageData.split                                                                 -- Raw Message Fragments (will be transformed into args)
 		)
 	end
+end)
+
+
+-- Goodies for Gambling: (listens to just messages from users)
+Client:on("messageCreate", function(Message)
+	if Message.content == nil then return end
+	if Message.author.bot then return end
+
+	Goodies:handleMessage(Message)
 end)
 
 

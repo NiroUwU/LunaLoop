@@ -5,7 +5,9 @@ function jsonfile.import(fl)
 
 	-- Return if file was not found:
 	if file == nil then
-		return "File not found"
+		local err = "File not found"
+		bot.debug(err)
+		return nil
 	end
 
 	local raw_json = file:read("a")

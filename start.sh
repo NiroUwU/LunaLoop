@@ -1,36 +1,17 @@
 #!/bin/bash
 
 # SETTINGS:
-PATH_scripts=./scripts
-
-
-# FUNCTIONS:
-function autoUpdate() {
-	git pull || echo -e "Could not fetch updates..."
-}
-function beforeBotRun() {
-	chmod +x -R scripts/*
-	chmod +x ./*.sh
-	
-	printf "Starting Bot at %s.\n" "$(date)"
-
-	# Execute first time setup, if file "info.lua" not found:
-	[ -f "info.lua" ] || $PATH_scripts/setup.sh
-	$PATH_scripts/update_file_structure.sh
-}
-function runBot() {
-	luvit main.lua || printf "Bot ran into an issue!\n"
-}
-function afterBotRun() {
-	printf "Bot terminated at %s.\n" "$(date)"
-}
+export PATH_scripts=./scripts
 
 
 # MAIN:
-function main() {
-	autoUpdate
-	beforeBotRun
-	runBot
-	afterBotRun
-}
-main
+
+# Fetch update from github repository:
+git pull || echo -e "Could not fetch updates... is git installed on this system?"
+
+# Add permissions to all script files:
+chmod +x $PATH_scripts/*
+chmod +x *.sh -R
+
+# Start the bot through script (will work with changes to files):
+$PATH_scripts/startBot.sh

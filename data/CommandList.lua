@@ -44,7 +44,7 @@ local function getErrorMessageEmbed(errorType, errormessage, usage)
 end
 
 
--- Administrative: (still WIP, does literally nothing at the moment)
+--[[ Administrative: (still WIP, does literally nothing at the moment)
 add("settings", {}, "Edit server-specific settings (requires administrator). (WIP)", commandType.admin, function(Message, Caller, args, ...)
 	local usage = "settings set setting_name true\nsettings add setting_name2 new_entry"
 	Caller = Message.member
@@ -97,7 +97,7 @@ add("settings", {}, "Edit server-specific settings (requires administrator). (WI
 	}
 	--Message:reply(allfunctions['list'].fn())
 	--ServerSetting:update(guild.id)
-end)
+end)]]
 
 
 -- Technical:

@@ -18,6 +18,7 @@ function bash.execute(fileOutput, cmd, ...)
 	run("%s > %s", cmd, fullFilePath)
 
 	local result = filehandler.read(fullFilePath)
+	if result == nil then result = "" end
 
 	-- Clear cached file, if setting enabled:
 	if Filesystem.autoRemoveCache or not tempBlock then

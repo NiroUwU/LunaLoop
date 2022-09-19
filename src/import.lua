@@ -54,11 +54,12 @@ info = load "info"
 cd("src/class")
 load "Command"
 load "MessageReaction"
-load "ServerSetting"
---load "MessageSubstring"
+load "Goodies"
+--load "ServerSetting"
 
 -- Import Data:
 cd("data")
+load "Config"
 load "CommandList"
 load "BannedIDs"
 load "BotProfile"
