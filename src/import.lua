@@ -31,8 +31,8 @@ end
 
 -- Help Utils
 cd("src")
-bot = load "bot"
 easy = load "easy"
+bot = load "bot"
 filehandler = load "filehandler"
 bash = load "bash"
 jsonfile = load "jsonfile"

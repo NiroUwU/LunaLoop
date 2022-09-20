@@ -15,11 +15,12 @@ local function add(Name, Aliases, Desc, Type, Func)
 	}
 end
 local commandType = {
-	technical = "Technical",
-	admin = "Administrative",
+	--admin = "Administrative",
 	chat = "Chatting",
+	goodies = "Goodies",
+	math = "Math",
 	social = "Social",
-	math = "Math"
+	technical = "Technical"
 }
 
 -- FUNCTIONS:
@@ -44,61 +45,118 @@ local function getErrorMessageEmbed(errorType, errormessage, usage)
 end
 
 
---[[ Administrative: (still WIP, does literally nothing at the moment)
-add("settings", {}, "Edit server-specific settings (requires administrator). (WIP)", commandType.admin, function(Message, Caller, args, ...)
-	local usage = "settings set setting_name true\nsettings add setting_name2 new_entry"
-	Caller = Message.member
-
-	-- Not in server:
-	if not Caller then
-		Message:reply { embed = getErrorMessageEmbed("Syntax", "Please execute this command in a server!", usage)}
-		return
+-- Goodies:
+add("balance", {"bal", "display-balance", "displaybalance"}, "Show your goody balance.", commandType.goodies, function(Message, Caller, args, ...)
+	local target = Message.author
+	if Message.mentionedUsers ~= nil then
+		if Message.mentionedUsers["first"] ~= nil then target = Message.mentionedUsers["first"] end
 	end
 
-	-- Check if member has privileges:
-	local guild = Message.guild
-	if guild.owner.user.id ~= Caller.user.id then
-		Message:reply { embed = getErrorMessageEmbed("Permission", "You lack the needed permissions to execute this command.", usage)}
-		return
-	end
-
-	-- Check if arguments present:
-	if #args < 1 then
-		Message:reply { embed = getErrorMessageEmbed("Syntax", "Please provide arguments as inputs.", usage)}
-		return
-	end
-
-	-- Update server settings:
-	--ServerSetting:update(guild.id)
-	local currentsettings = ServerSetting.list[guild.id]
-
-	local allfunctions = {
-		['update'] = {
-			desc = "Refreshes the current settings.",
-			fn = function()
-				ServerSetting:update(guild.id)
-				return "Successfully refreshed server settings!"
-			end
+	local bal = Goodies:getBalance(target.id)
+	Message:reply { embed = {
+		author = {
+			name = string.format("%s", target.username),
+			icon_url = target.avatarURL
 		},
-		['list'] = {
-			desc = "",
-			fn = function()
-				local temp = ""
-				for i,v in pairs(ServerSetting.list[guild.id]) do
-					temp = temp .. string.format("__ %s: __  %s", tostring(i), tostring(v))
-				end
-				return tostring(temp)
-			end
+		title = string.format("Balance: %s", tostring(bal)),
+		footer = {
+			text = string.format("ID: %s", target.id)
 		},
-		['add'] = {
-			desc = "Add a value to a list",
-			fn = function() end
-		}
+		color = Colours.embeds.default
+	}}
+end)
+
+add("transfer", {"pay", "givegoodies", "give-goodies"}, "Transfer goodies to a server member.", commandType.goodies, function(Message, Caller, args, ...)
+	local usage = "transfer [integer] @AnotherUser"
+	local target = nil
+	if Message.mentionedUsers ~= nil then
+		if Message.mentionedUsers["first"] ~= nil then
+			target = Message.mentionedUsers["first"]
+		end
+	end
+
+	-- Check Target:
+	if target == nil then
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "You have to specify another user to transfer goodies to!", usage)}
+		return
+	end
+	if target.id == Message.author.id then
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "You have to specify another user to transfer goodies to!", usage)}
+		return
+	end
+
+	-- Check valididty of transfer amount:
+	local amount = args[1]
+	if amount == nil then
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "You have to specify an amount to transfer as your first argument.", usage)}
+		return
+	end
+	amount = tonumber(amount)
+	if amount == nil then
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "You have to provide an integer value to transfer.", usage)}
+		return
+	end
+	if amount < 1 then
+		Message:reply { embed = getErrorMessageEmbed("Value", "You have to provide a positive integer as your transfer value.", usage)}
+		return
+	end
+	if math.floor(amount) ~= amount then
+		Message:reply { embed = getErrorMessageEmbed("Value", "You have to provide an integer.", usage)}
+		return
+	end
+
+	-- Attempt Transfer:
+	local successful, status = Goodies:modifyBalance(Message.author.id, amount * -1)
+	if not successful then
+		Message:reply { embed = getErrorMessageEmbed("Value", status, usage)}
+		return
+	end
+	Goodies:modifyBalance(target.id, amount)
+
+	-- Send confirmation embed:
+	local f = string.format
+	local desc = {
+		f("Transaction of %s goodies successful.", tostring(amount)),
+		f("%s's new balance: %s (-%s) goodies", Message.author.mentionString, Goodies:getBalance(Message.author.id), tostring(amount)),
+		f("%s's new balance: %s (+%s) goodies", target.mentionString, Goodies:getBalance(target.id), tostring(amount))
 	}
-	--Message:reply(allfunctions['list'].fn())
-	--ServerSetting:update(guild.id)
-end)]]
+	Message:reply { embed = {
+		title = "Transfer successful!",
+		description = table.concat(desc, "\n"),
+		color = Colours.embeds.success
+	}}
+end)
 
+add("daily", {"bonus", "reward", "dailyreward"}, "Cash in your daily amounts of goodies", commandType.goodies, function(Message, Caller, args, ...)
+	local userid = Message.author.id
+	local users = jsonfile.import(Goodies.users_file) or {}
+	if users[userid] == nil then users[userid] = {} end
+	if users[userid].lastdaily == nil then users[userid].lastdaily = 0 end
+
+	local time_now = os.time()
+	local time_old = users[userid].lastdaily
+
+	-- Check Daily Time Left:
+	local diff = time_now - time_old
+	if diff < Config.goodies.daily.claim_interval_seconds then
+		local till = easy.time.format(Config.goodies.daily.claim_interval_seconds - diff)
+		local desc = string.format("You have to wait another **%s** till you can claim another daily reward.", till)
+		Message:reply{ embed = getErrorMessageEmbed("Patience", desc)}
+		return
+	end
+
+	-- Update Json List:
+	users[userid].lastdaily = time_now
+	jsonfile.export(Goodies.users_file, users)
+
+	-- Add to balance:
+	Goodies:modifyBalance(userid, Config.goodies.daily.reward)
+	Message:reply { embed = {
+		title = "Daily reward claimed!",
+		description = string.format("You have claimed your daily %s goodies. (Current Balance: %s)", tostring(Config.goodies.daily.reward), tostring(Goodies:getBalance(userid))),
+		color = Colours.embeds.success
+	}}
+end)
 
 -- Technical:
 add("info", {"botinfo", "bot-info", "bot", "i"}, "Displays info about the bot.", commandType.technical, function(Message, Caller, args, ...)

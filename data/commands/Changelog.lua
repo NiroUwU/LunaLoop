@@ -103,4 +103,11 @@ Other:
 - organised file structure again :)
 ]]
 
+Changelog['v1.3.4'] = [[
+Added Commands:
+- balance (see your or another users goody-balance)
+- daily (get your daily amount of goodies)
+- transfer (transfer goodies to another person)
+]]
+
 return Changelog

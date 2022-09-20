@@ -5,7 +5,12 @@ Config = {
 		allow_bots = false
 	},
 	goodies = {
-		gain_per_message = 0.8
+		gain_per_message = 0.8,
+
+		daily = {
+			claim_interval_seconds = 86400,
+			reward = 100
+		}
 	}
 }
 
