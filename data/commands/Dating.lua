@@ -91,26 +91,7 @@ end
 --@param per1 and...
 --@param per2 ...have to be User Objects
 function Dating:getDescription(per1, per2)
-	local function concatAllActivities(tab, prev)
-		local tmp = {}
-		for i,v in pairs(tab) do
-			if type(v) == "table" then
-				local tmp2 = concatAllActivities(v, prev .. " " .. i)
-				for _,k in pairs(tmp2) do
-					table.insert(tmp, k)
-				end
-			elseif type(v) == "string" then
-				local str = string.format("%s %s", prev, v)
-				table.insert(tmp, str)
-			end
-		end
-		return tmp
-	end
-
-	-- Add all 
-	local temp = concatAllActivities(Dating.activities, "")
-	--print(table.concat(temp, ", "))
-
+	local temp = easy.table.readCompactStrings(Dating.activities)
 	local activity_str = easy.table.randomIn(temp)
 
 	local after = easy.table.randomIn(Dating.afterActivities)

@@ -97,4 +97,28 @@ function MessageReaction:execute(Message, Reaction, userID)
 	bot.debug("Done")
 end
 
+
+-- Main Function:
+function MessageReaction:handleReaction(Reaction, CallerID)
+	local Message = Reaction.message
+	local msg = MessageReaction.list[Message.id]
+	bot.debug("Bot observed an emoji reaction '%s' by %s", Reaction.emojiName, tostring(CallerID))
+
+	-- Check if reaction was added by a blocked user:
+	for i=0, #BannedIDs do
+		if CallerID == BannedIDs[i] then
+			bot.debug("Blocked user reacted to message. Ignoring reaction.")
+			return
+		end
+	end
+
+	-- Check if message is stored in memory:
+	if not msg then
+		bot.debug("Message with the id '%s' not saved in memory! Ignoring reaction.", Message.id)
+		return
+	end
+	bot.debug("Executing saved message (id: '%s') function (name: '%s')!", Message.id, Reaction.emojiName)
+	MessageReaction:execute(Message, Reaction, CallerID)
+end
+
 return MessageReaction

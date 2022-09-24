@@ -3,16 +3,18 @@ Goodies = {
 }
 
 local function getUsersFile()
-	return jsonfile.import(Goodies.users_file) or {}
+	return jsonfile.import(FileLocation.storage.usersfile) or {}
 end
 
 
 function Goodies:handleMessage(Message)
+	if Message.author.bot then return end
+	if Message.content == nil then return end
 	-- Check if users.json exists:
-	local users_file = filehandler.read(Goodies.users_file)
+	local users_file = filehandler.read(FileLocation.storage.usersfile)
 	if users_file == nil then
-		bot.debug("File '%s' was not found, creating!", Goodies.users_file)
-		io.output(Goodies.users_file):write("{}")
+		bot.debug("File '%s' was not found, creating!", FileLocation.storage.usersfile)
+		io.output(FileLocation.storage.usersfile):write("{}")
 		io.close()
 	end
 
@@ -26,7 +28,7 @@ function Goodies:handleMessage(Message)
 
 	-- Adds goodies to goodies value and writes it to json file:
 	users[userid].goodies = users[userid].goodies + Config.goodies.gain_per_message
-	jsonfile.export(Goodies.users_file, users)
+	jsonfile.export(FileLocation.storage.usersfile, users)
 end
 
 function Goodies:getBalance(userid)
@@ -71,7 +73,7 @@ function Goodies:modifyBalance(userid, amount)
 
 	-- Write new users list:
 	users[userid].goodies = balance_new
-	jsonfile.export(Goodies.users_file, users)
+	jsonfile.export(FileLocation.storage.usersfile, users)
 	return true, "Success"
 end
 

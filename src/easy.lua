@@ -4,6 +4,7 @@ easy = {
 	time   = {}
 }
 
+-- Table:
 function easy.table.randomIn(tab)
 	if type(tab) ~= "table" then
 		bot.debug("randomIn() needs a table of contents!")
@@ -14,11 +15,59 @@ function easy.table.randomIn(tab)
 	return tab[ranNum], ranNum, #tab
 end
 
+function easy.table.normalise(baseTable, valueTable)
+	local out = {}
+	local function doit(base, val)
+		local temp = {}
+		for i, bas in pairs(base) do
+			local dat = val[i]
+			if type(bas) == "table" then
+				if type(dat) == "table" then
+					temp[i] = doit(bas, dat)
+				else
+					temp[i] = bas
+				end
+			else
+				temp[i] = dat or bas
+			end
+		end
+		return temp
+	end
+
+	out = doit(baseTable, valueTable)
+	return out
+end
+
+function easy.table.readCompactStrings(stringTable)
+	local function concatAll(tab, prev)
+		local tmp = {}
+		for i,v in pairs(tab) do
+			if type(v) == "table" then
+				local tmp2 = concatAll(v, prev .. " " .. i)
+				for _,k in pairs(tmp2) do
+					table.insert(tmp, k)
+				end
+			elseif type(v) == "string" then
+				local str = string.format("%s %s", prev, v)
+				table.insert(tmp, str)
+			end
+		end
+		return tmp
+	end
+
+	return concatAll(stringTable, "")
+end
+
+-- String:
 function easy.string.firstUppercase(str, ...)
 	str = string.format(str, ...)
 	return (string.sub(str, 1, 1)):upper()..string.sub(str, 2, -1):lower()
 end
 
+easy.string.readCompact = easy.table.readCompactStrings
+
+
+-- Time:
 function easy.time.format(seconds)
 	local sec = tonumber(seconds)
 
@@ -47,3 +96,27 @@ function easy.time.format(seconds)
 end
 
 return easy
+--[[local function overwrite(base, values)
+		local temp = {}
+		for i,v in pairs(base) do
+			print("Doing:", i, v)
+			if type(v) == "table" then
+				print("Detected Table")
+				if values[i] ~= nil then
+					print("Recursion")
+					table.insert(temp, overwrite(v, values[i]), i)
+				else
+					print("Direct write")
+					base[i] = v
+				end
+			else
+				print("Not a table")
+				base[i] = values[i] or v
+			end
+		end
+		return base
+	end
+
+	local out = {}
+	table.insert(out, overwrite(baseTable, valueTable))
+	return out]]

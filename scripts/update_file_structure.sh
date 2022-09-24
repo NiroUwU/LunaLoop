@@ -9,6 +9,6 @@ done
 
 # Move all log files to 'logs' directory:
 LOG_files=$(ls ./*.log)
-for f in "${LOG_files[@]}"; do
+[ "$LOG_files" ] && for f in "${LOG_files[@]}"; do
 	mv "$f" "logs"
 done

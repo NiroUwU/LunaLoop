@@ -1,0 +1,9 @@
+{
+	"log-channels": {
+		"join-leave": 0,
+		"messages": 0,
+		"member-update": 0
+	},
+	"disabled-commands": [],
+	"prefix": null
+}

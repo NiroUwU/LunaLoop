@@ -15,7 +15,7 @@ local function add(Name, Aliases, Desc, Type, Func)
 	}
 end
 local commandType = {
-	--admin = "Administrative",
+	admin = "Administrative",
 	chat = "Chatting",
 	goodies = "Goodies",
 	math = "Math",
@@ -43,6 +43,88 @@ local function getErrorMessageEmbed(errorType, errormessage, usage)
 	end
 	return temp
 end
+
+
+-- Administrative:
+add("setchannel", {"channelset", "channel", "set"}, "Set a channel to a specific function.", commandType.admin, function(Message, Caller, args, ...)
+	local usage = "setchannel [function] [#Channel]\nsetchannel join-leave #welcome-messages"
+	-- On server:
+	if Message.member == nil then
+		Message:reply { embed = getErrorMessageEmbed("Logical", "You have to execute this command as the owner on a server.", usage)}
+		return
+	end
+	-- Owner:
+	if Message.guild.ownerId ~= Message.author.id then
+		Message:reply { embed = getErrorMessageEmbed("Permission", "Only the owner can run this command.", usage)}
+		return
+	end
+
+	-- Check if channel type provided:
+	if args == nil then
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "You have to supply the channel type and channel id as arguments.", usage)}
+		return
+	end
+	local channelType = args[1]
+	if channelType == nil then
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "You have to supply the channel type as first argument.", usage)}
+		return
+	end
+
+	-- Check if channel type is valid:
+	local pass = false
+	local template = jsonfile.import(FileLocation.templates.server)
+	if template == nil then
+		local msg = string.format("Template file for servers was not found... :( Please [%s/issues](report this here), if it happens.", info.repository)
+		Message:reply { embed = {"Internal", msg, usage}}
+		return
+	end
+	if template["log-channels"] ~= nil then
+		for i, v in pairs(template["log-channels"]) do
+			print(i, v, pass, channelType)
+			if i == channelType then pass = true end
+		end
+	end
+	if pass == false then
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "The channel type you have provided is invalid.", usage)}
+		return
+	end
+
+	-- Check channel:
+	local channel = {}
+	if Message.mentionedChannels ~= nil then
+		channel = Message.mentionedChannels["first"]
+	else
+	end
+
+	local channelid = 0
+	if channel.id ~= nil then channelid = channel.id end
+
+	if channelid == nil then
+		Message:reply { embed = getErrorMessageEmbed("Syntax", "You have to mention a valid channel as your second argument.", usage)}
+		return
+	end
+
+	-- Get and set channel:
+	local file_location = string.format("%s/%s.json", FileLocation.storage.serverdirectory, Message.guild.id)
+	local server = jsonfile.importarray(file_location, FileLocation.templates.server) --jsonfile.import(file_location) or jsonfile.import(FileLocation.templates.server) --or { ["log-channels"] = {}}
+	if server == nil or server == {} then return end
+
+	server["log-channels"][channelType] = channelid
+	jsonfile.export(file_location, server)
+
+	-- Confirmation message:
+	local str = ""
+	for i, v in pairs(server["log-channels"]) do
+		local ch = "none"
+		if v ~= 0 then ch = "<#" .. v .. ">" end
+		str = string.format("%s%s: %s\n", str, i, ch)
+	end
+	Message:reply { embed = {
+		title = "Server File Successfully Updated!",
+		description = str,
+		color = Colours.embeds.success
+	}}
+end)
 
 
 -- Goodies:
@@ -129,7 +211,7 @@ end)
 
 add("daily", {"bonus", "reward", "dailyreward"}, "Cash in your daily amounts of goodies", commandType.goodies, function(Message, Caller, args, ...)
 	local userid = Message.author.id
-	local users = jsonfile.import(Goodies.users_file) or {}
+	local users = jsonfile.import(FileLocation.storage.usersfile) or {}
 	if users[userid] == nil then users[userid] = {} end
 	if users[userid].lastdaily == nil then users[userid].lastdaily = 0 end
 
@@ -147,7 +229,7 @@ add("daily", {"bonus", "reward", "dailyreward"}, "Cash in your daily amounts of 
 
 	-- Update Json List:
 	users[userid].lastdaily = time_now
-	jsonfile.export(Goodies.users_file, users)
+	jsonfile.export(FileLocation.storage.usersfile, users)
 
 	-- Add to balance:
 	Goodies:modifyBalance(userid, Config.goodies.daily.reward)
@@ -157,6 +239,7 @@ add("daily", {"bonus", "reward", "dailyreward"}, "Cash in your daily amounts of 
 		color = Colours.embeds.success
 	}}
 end)
+
 
 -- Technical:
 add("info", {"botinfo", "bot-info", "bot", "i"}, "Displays info about the bot.", commandType.technical, function(Message, Caller, args, ...)

@@ -59,6 +59,7 @@ load "Goodies"
 
 -- Import Data:
 cd("data")
+load "FileLocation"
 load "Config"
 load "CommandList"
 load "BannedIDs"
@@ -75,3 +76,5 @@ load "Dating"
 load "Changelog"
 load "YesNoMaybe"
 load "InfoCommandData"
+load "LogChannel"
+load "MemberJoinLeave"

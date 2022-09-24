@@ -110,4 +110,13 @@ Added Commands:
 - transfer (transfer goodies to another person)
 ]]
 
+Changelog['v1.3.5'] = [[
+Added Commands:
+- setchannel (allows the server owner to set a channel for logging)
+
+Added Functionality:
+- logs (message modifications, member joining/leaving)
+- server config-files (still WIP)
+]]
+
 return Changelog

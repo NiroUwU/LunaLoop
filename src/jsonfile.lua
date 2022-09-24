@@ -5,9 +5,9 @@ function jsonfile.import(fl)
 
 	-- Return if file was not found:
 	if file == nil then
-		local err = "File not found"
+		local err = string.format("Json file '%s' not found...", fl)
 		bot.debug(err)
-		return nil
+		return nil, err
 	end
 
 	local raw_json = file:read("a")
@@ -15,6 +15,22 @@ function jsonfile.import(fl)
 
 	local formated_json = json.decode(raw_json)
 	return formated_json
+end
+
+function jsonfile.importarray(fl, template)
+	local base, err1 = jsonfile.import(template)
+	local data, err2 = jsonfile.import(fl)
+
+	if base == nil then
+		bot.debug(err1 .. " (base/template)")
+		return {}
+	end
+	if data == nil then
+		bot.debug(err2 .. " (data)")
+		return base
+	end
+
+	return easy.table.normalise(base, data)
 end
 
 function jsonfile.export(fl, data)
@@ -25,13 +41,9 @@ function jsonfile.export(fl, data)
 	end
 	local formated_json = json.encode(data)
 
-	local file = io.open(fl, "w+")
-	if file then
-		file:write(formated_json)
-		file:close()
-		return
-	end
-	bot.debug("File '%s' was not found, could not be written to.", fl)
+	io.output(fl)
+	io.write(formated_json)
+	io.close()
 end
 
 return jsonfile
