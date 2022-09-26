@@ -24,7 +24,7 @@ local commandType = {
 }
 
 -- FUNCTIONS:
-local function getErrorMessageEmbed(errorType, errormessage, usage)
+function getErrorMessageEmbed(errorType, errormessage, usage)
 	if errorType == nil or errorType == "" then
 		errorType = ""
 	else
@@ -128,6 +128,18 @@ end)
 
 
 -- Goodies:
+add("lotteryticket", {"lottery-ticket", "buyticket", "buy-ticket"}, "Buys an entry ticket to the server's lottery.", commandType.goodies, function(Message, Caller, args, ...)
+	Lottery:buyTicket(Message, Caller, args, ...)
+end)
+
+add("drawlottery", {"draw-lottery", "lotterydraw", "lottery-draw"}, "Start the lottery draw (Requires Server Owner)!", commandType.goodies, function(Message, Caller, args, ...)
+	Lottery:draw(Message, Caller, args, ...)
+end)
+
+add("lotterystatus", {"lottery-status", "statuslottery", "lottery", "showlottery", "show-lottery", "jackpot"}, "Displays current information about the server's lottery.", commandType.goodies, function(Message, Caller, args, ...)
+	Lottery:status(Message, Caller, args, ...)
+end)
+
 add("balance", {"bal", "display-balance", "displaybalance"}, "Show your goody balance.", commandType.goodies, function(Message, Caller, args, ...)
 	local target = Message.author
 	if Message.mentionedUsers ~= nil then
@@ -232,7 +244,7 @@ add("daily", {"bonus", "reward", "dailyreward"}, "Cash in your daily amounts of 
 	jsonfile.export(FileLocation.storage.usersfile, users)
 
 	-- Add to balance:
-	Goodies:modifyBalance(userid, Config.goodies.daily.reward)
+	Goodies:modifyBalance(userid, Config.goodies.daily.reward, true)
 	Message:reply { embed = {
 		title = "Daily reward claimed!",
 		description = string.format("You have claimed your daily %s goodies. (Current Balance: %s)", tostring(Config.goodies.daily.reward), tostring(Goodies:getBalance(userid))),
@@ -277,37 +289,71 @@ add("apple", {"testreaction", "test-reaction", "appletest", "apple-test"}, "Test
 end)
 
 add("help", {"commands", "commandlist"}, "Displays a help message about all commands.", commandType.technical, function(Message, Caller, args, ...)
+	-- Embed Message:
+	local emb = {
+		title = "Help Command",
+		description = "This is a list of all available commands.\nYou can filter categories by appending their name after the help command as an argument.\nTo see all categories type 'help all'.",
+		fields = {},
+		footer = {},
+		color = Colours.embeds.default
+	}
+
+	-- Sort Commands by their types:
 	local sorted = {}
-	for i, v in pairs(CommandList.list) do
-		-- Create new Category if not existant:
-		if sorted[v.type] == nil then
-			sorted[v.type] = {}
-		end
-
-		-- Add command to category:
-		table.insert(sorted[v.type], v)
+	for _, cmd in pairs(CommandList.list) do
+		local type = cmd.type
+		if sorted[type] == nil then sorted[type] = {} end
+		table.insert(sorted[type], cmd)
 	end
-	table.sort(sorted)
 
-	local finalFields = {}
-	for category, cmds in pairs(sorted) do
-		local newField = {
-			name = easy.string.firstUppercase(category),
+	-- Clean up user input:
+	local cleaned_user_input = {}
+	for _, word in pairs(args) do
+		word = tostring(word):lower()
+		if cleaned_user_input[word] == nil then cleaned_user_input[word] = 0 end
+		cleaned_user_input[word] = cleaned_user_input[word] + 1
+	end
+
+	-- Filter out categories from user input:
+	local requested_categories = {}
+	for word, _ in pairs(cleaned_user_input) do
+		-- If "all", add all categories:
+		if word:lower() == "all" then
+			for category, _ in pairs(sorted) do
+				table.insert(requested_categories, category)
+			end
+			break
+		end
+		-- Compare to categories:
+		for category, _ in pairs(sorted) do
+			if category:lower() == word:lower() then table.insert(requested_categories, category) end
+		end
+	end
+
+	-- No categories requested, add all:
+	if #requested_categories < 1 then
+		--for category, _ in pairs(sorted) do table.insert(requested_categories, category) end
+		local categories = {}
+		for cat, _ in pairs(sorted) do table.insert(categories, cat) end
+		emb.footer.text = "⚠️ No valid filter options provided, displaying list of categories."
+		emb.description = emb.description .. string.format("\n\nYou have to specify one or multiple categories. List of categories:\n**%s**", table.concat(categories, "**, **"))
+	end
+
+	-- Add categories to embed as fields:
+	for _, category in pairs(requested_categories) do
+		local field = {
+			name = string.format("__%s:__", easy.string.firstUppercase(category)),
 			value = "",
 			inline = false
 		}
-		for _, cmd in pairs(cmds) do
-			newField.value = newField.value .. string.format("\n**%s** - *%s*", cmd.name, cmd.desc)
+		for _, cmd in pairs(sorted[category]) do
+			field.value = string.format("%s● *%s* - %s\n", field.value, cmd.name, cmd.desc)
 		end
-		table.insert(finalFields, newField)
+		table.insert(emb.fields, field)
 	end
 
-	Message:reply { embed = {
-		title = "Command List",
-		description = "This is a list of all commands I am capable of!",
-		fields = finalFields,
-		color = Colours.embeds.default
-	}}
+	-- Send Embed Message:
+	Message:reply { embed = emb }
 end)
 
 add("ping", {}, "Pong! :D", commandType.technical, function(Message, Caller, args, ...)

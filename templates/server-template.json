@@ -5,5 +5,6 @@
 		"member-update": 0
 	},
 	"disabled-commands": [],
-	"prefix": null
+	"prefix": null,
+	"lottery" : {}
 }

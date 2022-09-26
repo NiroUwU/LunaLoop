@@ -11,7 +11,6 @@ echo -e "Invite Link (optional): \c" && read -r INVITE
 echo "-- These are the bot information needed to connect to your discord application:
 info = {
 	name = '$NAME',
-	version = globalInfo.version,
 	prefix = '$PREFIX',
 	token = '$TOKEN',
 	invite = '$INVITE',

@@ -16,18 +16,11 @@ switch = Switch.switch
 -- Due to my inability to remember my own code structure:
 easy.debug = bot.debug
 
+-- Legacy variables: (i am still very lazy)
+info.version = globalInfo.version
+
 
 -- FUNCTIONS:
-local function getGlobalErrorMessage()
-	return {
-		title = "Internal Bot Error",
-		description = "The bot ran into an error while executing a command.\nPlease report this issue if you see this message. :)",
-		footer = {
-			text = "Please report here: " .. info.repository .. "/issues"
-		}
-	}
-end
-
 local function updateProfile()
 	Client:setUsername(info.name)
 	Client:setGame(BotProfile.playing)

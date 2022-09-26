@@ -1,6 +1,7 @@
 easy = {
 	table  = {},
 	string = {},
+	number = {},
 	time   = {}
 }
 
@@ -66,6 +67,34 @@ end
 
 easy.string.readCompact = easy.table.readCompactStrings
 
+
+-- Number:
+function easy.number.tointeger(num)
+	num = tonumber(num)
+
+	-- Attempt to convert to number:
+	if num == nil then return nil end
+	if tostring(num) == "nan" then return nil end
+
+	-- Attempt to convert to integer:
+	num = math.floor(num)
+	if num == nil then return nil end
+
+	-- Number is an integer:
+	return num
+end
+
+function easy.number.forcetointeger(num, forced_value)
+	-- Attempt to convert:
+	num = easy.number.tointeger(num)
+
+	-- Number is an integer:
+	if num ~= nil then return num end
+
+	-- Return forced value:
+	if forced_value == nil then forced_value = 0 end
+	return forced_value
+end
 
 -- Time:
 function easy.time.format(seconds)

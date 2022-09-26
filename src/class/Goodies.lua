@@ -50,7 +50,8 @@ function Goodies:getBalance(userid)
 end
 
 -- Returns true or false depending on success of action, and string if unsuccessful explaining why failure happened:
-function Goodies:modifyBalance(userid, amount)
+function Goodies:modifyBalance(userid, amount, ignoreBalanceCheck)
+	if ignoreBalanceCheck == nil then ignoreBalanceCheck = false end
 	if type(amount) ~= "number" then
 		bot.debug("Attempted modifying balance of user '%s' with a not number value (%s)!", tostring(userid), tostring(amount))
 		return false, "Provided value was not a number."
@@ -62,7 +63,7 @@ function Goodies:modifyBalance(userid, amount)
 	local balance_old = Goodies:getBalance(userid)
 	local balance_new = balance_old + amount
 
-	if balance_new < 0 then
+	if ignoreBalanceCheck == false and balance_new < 0 then
 		bot.debug("")
 		return false, "New balance would go into negative."
 	end

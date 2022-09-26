@@ -59,6 +59,7 @@ load "Goodies"
 
 -- Import Data:
 cd("data")
+load "TextFile"
 load "FileLocation"
 load "Config"
 load "CommandList"
@@ -78,3 +79,4 @@ load "YesNoMaybe"
 load "InfoCommandData"
 load "LogChannel"
 load "MemberJoinLeave"
+load "Lottery"

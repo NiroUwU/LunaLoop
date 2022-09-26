@@ -5,6 +5,7 @@ Message:reply { embed = {
 	description = "Here is my fancy description!",
 	author = {
 		name = Message.author.username,
+		url = "https://discord.com/",
 		icon_url = Message.author.avatarURL
 	},
 	image = {
@@ -23,7 +24,8 @@ Message:reply { embed = {
 		}
 	},
 	footer = {
-		text = ""
+		text = "",
+		icon_url = "https://urmother.com/"
 	},
 	color = Colours.embeds.default
 }}

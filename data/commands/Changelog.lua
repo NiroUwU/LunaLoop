@@ -119,4 +119,14 @@ Added Functionality:
 - server config-files (still WIP)
 ]]
 
+Changelog['v1.4.0'] = [[
+Added Commands:
+- lotterystatus (displays the current server's lottery)
+- lotteryticket (buy one or more lottery tickets)
+- lotterydraw (draws the server's lottery, requires server owner!)
+
+Changes:
+- reworked help command
+]]
+
 return Changelog
